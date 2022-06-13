@@ -17,9 +17,28 @@ You should have received a copy of the GNU General Public License
 along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <boost/asio.hpp>
 #include "Server.hpp"
+
+#define PORT 15000
+
+void AsyncAccept(boost::asio::ip::tcp::acceptor& acceptor)
+{
+	acceptor.async_accept(
+		[&acceptor](const boost::system::error_code& error, boost::asio::ip::tcp::socket socket)
+		{
+			if (!error)
+			{
+				// TODO
+			}
+			AsyncAccept(acceptor);
+		});
+}
 
 void RunServer()
 {
-	// TODO
+	boost::asio::io_context ioContext{};
+	boost::asio::ip::tcp::acceptor acceptor{ ioContext, { boost::asio::ip::tcp::v4(), PORT } };
+	AsyncAccept(acceptor);
+	ioContext.run();
 }
