@@ -18,7 +18,9 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <utility>
+
 #include <boost/asio.hpp>
+
 #include "Server.hpp"
 #include "ClientHandler.hpp"
 

@@ -19,15 +19,16 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <iostream>
 #include <utility>
+
 #include "ClientHandler.hpp"
 
 ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
 	: m_socket{ std::move(socket) }
 {
-	std::cout << "Connection\n";
+	std::cout << "[INFO] Client connected (" << m_socket.remote_endpoint().address().to_string() << ")\n";
 }
 
 ClientHandler::~ClientHandler()
 {
-	std::cout << "Disconnection\n";
+	std::cout << "[INFO] Client disconnected (" << m_socket.remote_endpoint().address().to_string() << ")\n";
 }

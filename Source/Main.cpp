@@ -19,6 +19,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <cstdlib>
 #include <iostream>
+
 #include "Server.hpp"
 
 int main(int /*argc*/, char* /*argv*/[])
