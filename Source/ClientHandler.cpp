@@ -17,30 +17,17 @@ You should have received a copy of the GNU General Public License
 along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <iostream>
 #include <utility>
-#include <boost/asio.hpp>
-#include "Server.hpp"
 #include "ClientHandler.hpp"
 
-void AsyncAccept(boost::asio::ip::tcp::acceptor& acceptor)
+ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
+	: m_socket{ std::move(socket) }
 {
-	acceptor.async_accept(
-		[&acceptor](const boost::system::error_code& error, boost::asio::ip::tcp::socket socket)
-		{
-			if (!error)
-			{
-				ClientHandler clientHandler{ std::move(socket) };
-				// TODO
-			}
-			AsyncAccept(acceptor);
-		});
+	std::cout << "Connection\n";
 }
 
-void RunServer()
+ClientHandler::~ClientHandler()
 {
-	const boost::asio::ip::tcp::endpoint endpoint{ boost::asio::ip::tcp::v4(), 15000 };
-	boost::asio::io_context ioContext{};
-	boost::asio::ip::tcp::acceptor acceptor{ ioContext, endpoint };
-	AsyncAccept(acceptor);
-	ioContext.run();
+	std::cout << "Disconnection\n";
 }

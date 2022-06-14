@@ -16,4 +16,6 @@ endif ()
 add_executable (${PROJECT_NAME}
 	Source/Main.cpp
 	Source/Server.hpp
-	Source/Server.cpp)
+	Source/Server.cpp
+	Source/ClientHandler.hpp
+	Source/ClientHandler.cpp)
