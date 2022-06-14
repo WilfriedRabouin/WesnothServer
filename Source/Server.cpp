@@ -20,8 +20,6 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <boost/asio.hpp>
 #include "Server.hpp"
 
-#define PORT 15000
-
 void AsyncAccept(boost::asio::ip::tcp::acceptor& acceptor)
 {
 	acceptor.async_accept(
@@ -37,8 +35,9 @@ void AsyncAccept(boost::asio::ip::tcp::acceptor& acceptor)
 
 void RunServer()
 {
+	const boost::asio::ip::tcp::endpoint endpoint{ boost::asio::ip::tcp::v4(), 15000 };
 	boost::asio::io_context ioContext{};
-	boost::asio::ip::tcp::acceptor acceptor{ ioContext, { boost::asio::ip::tcp::v4(), PORT } };
+	boost::asio::ip::tcp::acceptor acceptor{ ioContext, endpoint };
 	AsyncAccept(acceptor);
 	ioContext.run();
 }
