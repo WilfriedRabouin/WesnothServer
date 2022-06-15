@@ -24,9 +24,13 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 class ClientHandler
 {
 public:
+	static [[nodiscard]] std::size_t InstanceCount();
+
 	explicit ClientHandler(boost::asio::ip::tcp::socket socket);
 	~ClientHandler();
 
 private:
+	static std::size_t s_instanceCount;
+
 	boost::asio::ip::tcp::socket m_socket;
 };

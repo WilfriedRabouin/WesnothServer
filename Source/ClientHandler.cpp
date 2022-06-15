@@ -22,13 +22,22 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "ClientHandler.hpp"
 
+std::size_t ClientHandler::s_instanceCount{};
+
+[[nodiscard]] std::size_t ClientHandler::InstanceCount()
+{
+	return s_instanceCount;
+}
+
 ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
 	: m_socket{ std::move(socket) }
 {
 	std::cout << "[INFO] Client connected (" << m_socket.remote_endpoint().address().to_string() << ")\n";
+	++s_instanceCount;
 }
 
 ClientHandler::~ClientHandler()
 {
 	std::cout << "[INFO] Client disconnected (" << m_socket.remote_endpoint().address().to_string() << ")\n";
+	--s_instanceCount;
 }
