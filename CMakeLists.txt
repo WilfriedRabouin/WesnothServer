@@ -2,10 +2,6 @@
 
 project (WesnothServer)
 
-set (CMAKE_CXX_STANDARD 20)
-set (CMAKE_CXX_STANDARD_REQUIRED ON)
-set (CMAKE_CXX_EXTENSIONS OFF)
-
 find_package (Boost 1.79.0 REQUIRED)
 
 set (SPDLOG_NO_THREAD_ID ON)
@@ -18,6 +14,12 @@ add_executable (${PROJECT_NAME}
 	Source/Server.cpp
 	Source/ClientHandler.hpp
 	Source/ClientHandler.cpp
+)
+
+set_target_properties (${PROJECT_NAME} PROPERTIES
+	CXX_STANDARD 20
+	CXX_STANDARD_REQUIRED ON
+	CXX_EXTENSIONS OFF
 )
 
 target_include_directories (${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
