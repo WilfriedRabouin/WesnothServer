@@ -32,12 +32,12 @@ std::size_t ClientHandler::s_instanceCount{};
 ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
 	: m_socket{ std::move(socket) }
 {
-	std::cout << "[INFO] Client connected (" << m_socket.remote_endpoint().address().to_string() << ")\n";
+	std::cout << "[INFO] " << m_socket.remote_endpoint().address().to_string() << ": connected\n";
 	++s_instanceCount;
 }
 
 ClientHandler::~ClientHandler()
 {
-	std::cout << "[INFO] Client disconnected (" << m_socket.remote_endpoint().address().to_string() << ")\n";
+	std::cout << "[INFO] " << m_socket.remote_endpoint().address().to_string() << ": disconnected\n";
 	--s_instanceCount;
 }
