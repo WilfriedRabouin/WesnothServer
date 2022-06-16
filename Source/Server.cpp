@@ -25,6 +25,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include "Server.hpp"
 #include "ClientHandler.hpp"
 
+// TODO: make it a recursive lambda once the deducing 'this' feature is available (C++23)
 void AsyncAccept(boost::asio::ip::tcp::acceptor& acceptor, bool isClientCountLimited, std::size_t clientCountLimit)
 {
 	acceptor.async_accept(
