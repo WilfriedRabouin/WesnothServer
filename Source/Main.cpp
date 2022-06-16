@@ -26,7 +26,7 @@ int main(int /*argc*/, char* /*argv*/[])
 {
 	try
 	{
-		RunServer();
+		RunServer(true, 1);
 		return EXIT_SUCCESS;
 	}
 	catch (const std::exception& e)
