@@ -29,7 +29,7 @@ void AsyncAccept(boost::asio::ip::tcp::acceptor& acceptor, bool isClientCountLim
 	acceptor.async_accept(
 		[&acceptor, isClientCountLimited, clientCountLimit](const boost::system::error_code& error, boost::asio::ip::tcp::socket socket)
 		{
-			if (!error && (!isClientCountLimited || ClientHandler::InstanceCount() < clientCountLimit))
+			if (!error && (!isClientCountLimited || ClientHandler::GetInstanceCount() < clientCountLimit))
 			{
 				ClientHandler clientHandler{ std::move(socket) };
 				// TODO

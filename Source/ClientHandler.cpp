@@ -24,7 +24,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 std::size_t ClientHandler::s_instanceCount{};
 
-[[nodiscard]] std::size_t ClientHandler::InstanceCount()
+[[nodiscard]] std::size_t ClientHandler::GetInstanceCount()
 {
 	return s_instanceCount;
 }
