@@ -17,10 +17,10 @@ You should have received a copy of the GNU General Public License
 along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <iostream>
 #include <utility>
 
 #include <boost/asio.hpp>
+#include <spdlog/spdlog.h>
 
 #include "Server.hpp"
 #include "ClientHandler.hpp"
@@ -33,11 +33,11 @@ void AsyncAccept(boost::asio::ip::tcp::acceptor& acceptor, bool isClientCountLim
 		{
 			if (error)
 			{
-				std::cerr << "[ERROR] Failed to accept a new connection: " << error.message() << "\n";
+				spdlog::error("Failed to accept new connection: {}", error.message());
 			}
 			else if (isClientCountLimited && ClientHandler::GetInstanceCount() == clientCountLimit)
 			{
-				std::cerr << "[WARNING] " << socket.remote_endpoint().address().to_string() << ": connection refused (client count limit reached)\n";
+				spdlog::warn("{}: connection refused (client count limit reached)", socket.remote_endpoint().address().to_string());
 			}
 			else
 			{

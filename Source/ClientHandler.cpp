@@ -17,8 +17,9 @@ You should have received a copy of the GNU General Public License
 along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <iostream>
 #include <utility>
+
+#include <spdlog/spdlog.h>
 
 #include "ClientHandler.hpp"
 
@@ -32,12 +33,12 @@ std::size_t ClientHandler::s_instanceCount{};
 ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
 	: m_socket{ std::move(socket) }
 {
-	std::cout << "[INFO] " << m_socket.remote_endpoint().address().to_string() << ": connected\n";
+	spdlog::info("{}: connected", m_socket.remote_endpoint().address().to_string());
 	++s_instanceCount;
 }
 
 ClientHandler::~ClientHandler()
 {
-	std::cout << "[INFO] " << m_socket.remote_endpoint().address().to_string() << ": disconnected\n";
+	spdlog::info("{}: disconnected", m_socket.remote_endpoint().address().to_string());
 	--s_instanceCount;
 }

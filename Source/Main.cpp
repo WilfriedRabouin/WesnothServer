@@ -18,7 +18,8 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <cstdlib>
-#include <iostream>
+
+#include <spdlog/spdlog.h>
 
 #include "Server.hpp"
 
@@ -31,7 +32,7 @@ int main(int /*argc*/, char* /*argv*/[])
 	}
 	catch (const std::exception& e)
 	{
-		std::cerr << e.what() << "\n";
+		spdlog::critical("{}", e.what());
 		return EXIT_FAILURE;
 	}
 }
