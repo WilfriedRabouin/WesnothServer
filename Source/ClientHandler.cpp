@@ -18,6 +18,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <utility>
+#include <algorithm>
 
 #include <spdlog/spdlog.h>
 
@@ -43,23 +44,38 @@ ClientHandler::~ClientHandler()
 
 void ClientHandler::AsyncHandshake()
 {
-	m_receivedData.resize(4);
-
-	boost::asio::async_read(m_socket, boost::asio::buffer(m_receivedData),
-		[self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, 4),
+		[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 		{
-			if (!error)
+			if (error)
 			{
-				//m_sentData = { static_cast<char>(0xde), static_cast<char>(0xad), static_cast<char>(0xbe), static_cast<char>(0xef) };
-				//boost::asio::async_write(m_socket, boost::asio::buffer(m_sentData),
-				//	[this, clientHandler](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
-				//	{
-				//		if (!error)
-				//		{
-				//			//std::cout << "Handshake done\n";
-				//			//AsyncRead();
-				//		}
-				//	});
+				spdlog::error("{}: handshake failed ({})", m_socket.remote_endpoint().address().to_string(), error.message());
+			}
+			else
+			{
+				// TODO: handle TLS
+				constexpr std::array<char, 4> expectedData{};
+				if (std::ranges::equal(m_inputData, expectedData))
+				{
+					m_outputData = { '\xde', '\xad', '\xbe', '\xef' };
+					boost::asio::async_write(m_socket, boost::asio::buffer(m_outputData),
+						[this, self](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+						{
+							if (error)
+							{
+								spdlog::error("{}: handshake failed ({})", m_socket.remote_endpoint().address().to_string(), error.message());
+							}
+							else
+							{
+								spdlog::info("{}: handshake done", m_socket.remote_endpoint().address().to_string());
+								// TODO
+							}
+						});
+				}
+				else
+				{
+					spdlog::error("{}: handshake failed (wrong data received from client)", m_socket.remote_endpoint().address().to_string());
+				}
 			}
 		});
 }

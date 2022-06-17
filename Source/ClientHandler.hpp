@@ -40,5 +40,6 @@ private:
 	static std::size_t s_instanceCount;
 
 	boost::asio::ip::tcp::socket m_socket;
-	std::vector<char> m_receivedData{};
+	std::vector<char> m_inputData{};
+	std::vector<char> m_outputData{};
 };
