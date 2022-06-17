@@ -49,7 +49,8 @@ void AsyncAccept(boost::asio::ip::tcp::acceptor& acceptor, bool isClientCountLim
 
 void RunServer(bool isClientCountLimited, std::size_t clientCountLimit)
 {
-	const boost::asio::ip::tcp::endpoint endpoint{ boost::asio::ip::tcp::v4(), 15000 };
+	constexpr boost::asio::ip::port_type port{ 15000 };
+	const boost::asio::ip::tcp::endpoint endpoint{ boost::asio::ip::tcp::v4(), port };
 	boost::asio::io_context ioContext{};
 	boost::asio::ip::tcp::acceptor acceptor{ ioContext, endpoint };
 	AsyncAccept(acceptor, isClientCountLimited, clientCountLimit);
