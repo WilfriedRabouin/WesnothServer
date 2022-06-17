@@ -25,16 +25,14 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 std::size_t ClientHandler::s_instanceCount{};
 
+[[nodiscard]] std::shared_ptr<ClientHandler> ClientHandler::create(boost::asio::ip::tcp::socket socket)
+{
+	return std::shared_ptr<ClientHandler>{ new ClientHandler{ std::move(socket) } };
+}
+
 [[nodiscard]] std::size_t ClientHandler::GetInstanceCount()
 {
 	return s_instanceCount;
-}
-
-ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
-	: m_socket{ std::move(socket) }
-{
-	spdlog::info("{}: connected", m_socket.remote_endpoint().address().to_string());
-	++s_instanceCount;
 }
 
 ClientHandler::~ClientHandler()
@@ -48,7 +46,7 @@ void ClientHandler::DoHandshake()
 	m_receivedData.resize(4);
 
 	boost::asio::async_read(m_socket, boost::asio::buffer(m_receivedData),
-		[](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+		[self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 		{
 			if (!error)
 			{
@@ -64,4 +62,11 @@ void ClientHandler::DoHandshake()
 				//	});
 			}
 		});
+}
+
+ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
+	: m_socket{ std::move(socket) }
+{
+	spdlog::info("{}: connected", m_socket.remote_endpoint().address().to_string());
+	++s_instanceCount;
 }

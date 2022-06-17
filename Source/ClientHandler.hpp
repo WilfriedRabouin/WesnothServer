@@ -21,20 +21,23 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <cstdint>
 #include <vector>
+#include <memory>
 
 #include <boost/asio.hpp>
 
-class ClientHandler
+class ClientHandler : public std::enable_shared_from_this<ClientHandler>
 {
 public:
+	static [[nodiscard]] std::shared_ptr<ClientHandler> create(boost::asio::ip::tcp::socket socket);
 	static [[nodiscard]] std::size_t GetInstanceCount();
 
-	explicit ClientHandler(boost::asio::ip::tcp::socket socket);
 	~ClientHandler();
 
 	void DoHandshake();
 
 private:
+	explicit ClientHandler(boost::asio::ip::tcp::socket socket);
+
 	static std::size_t s_instanceCount;
 
 	boost::asio::ip::tcp::socket m_socket;
