@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <array>
 #include <utility>
 #include <algorithm>
 
@@ -51,43 +52,42 @@ void ClientHandler::AsyncHandshake()
 {
 	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, 4),
 		[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+	{
+		constexpr std::array<char, 4> normalConnection{ 0, 0, 0, 0 };
+		constexpr std::array<char, 4> tlsConnection{ 0, 0, 0, 1 };
+
+		if (error)
 		{
-			if (error)
-			{
-				spdlog::error("{}: handshake request failed ({})", GetAddressString(), error.message());
-			}
-			else
-			{
-				constexpr std::array<char, 4> normalConnection{ 0, 0, 0, 0 };
-				constexpr std::array<char, 4> tlsConnection{ 0, 0, 0, 1 };
-				if (std::ranges::equal(m_inputData, normalConnection))
+			spdlog::error("{}: handshake request failed ({})", GetAddressString(), error.message());
+		}
+		else if (std::ranges::equal(m_inputData, normalConnection))
+		{
+			m_outputData = { '\xde', '\xad', '\xbe', '\xef' };
+
+			boost::asio::async_write(m_socket, boost::asio::buffer(m_outputData),
+				[this, self](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 				{
-					m_outputData = { '\xde', '\xad', '\xbe', '\xef' };
-					boost::asio::async_write(m_socket, boost::asio::buffer(m_outputData),
-						[this, self](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
-						{
-							if (error)
-							{
-								spdlog::error("{}: handshake response failed ({})", GetAddressString(), error.message());
-							}
-							else
-							{
-								spdlog::debug("{}: handshake done", GetAddressString());
-								// TODO
-							}
-						});
-				}
-				else if (std::ranges::equal(m_inputData, tlsConnection))
-				{
-					spdlog::warn("{}: handshake failed (TLS not implemented yet)", GetAddressString());
-					// TODO: implement TLS
-				}
-				else
-				{
-					spdlog::error("{}: handshake failed (wrong data received from client)", GetAddressString());
-				}
-			}
-		});
+					if (error)
+					{
+						spdlog::error("{}: handshake response failed ({})", GetAddressString(), error.message());
+					}
+					else
+					{
+						spdlog::debug("{}: handshake done", GetAddressString());
+						// TODO
+					}
+				});
+		}
+		else if (std::ranges::equal(m_inputData, tlsConnection))
+		{
+			spdlog::warn("{}: handshake failed (TLS not implemented yet)", GetAddressString());
+			// TODO: implement TLS
+		}
+		else
+		{
+			spdlog::error("{}: handshake failed (wrong data received from client)", GetAddressString());
+		}
+	});
 }
 
 ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
