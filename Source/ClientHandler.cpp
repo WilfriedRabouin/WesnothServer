@@ -42,3 +42,26 @@ ClientHandler::~ClientHandler()
 	spdlog::info("{}: disconnected", m_socket.remote_endpoint().address().to_string());
 	--s_instanceCount;
 }
+
+void ClientHandler::DoHandshake()
+{
+	m_receivedData.resize(4);
+
+	boost::asio::async_read(m_socket, boost::asio::buffer(m_receivedData),
+		[](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+		{
+			if (!error)
+			{
+				//m_sentData = { static_cast<char>(0xde), static_cast<char>(0xad), static_cast<char>(0xbe), static_cast<char>(0xef) };
+				//boost::asio::async_write(m_socket, boost::asio::buffer(m_sentData),
+				//	[this, clientHandler](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+				//	{
+				//		if (!error)
+				//		{
+				//			//std::cout << "Handshake done\n";
+				//			//AsyncRead();
+				//		}
+				//	});
+			}
+		});
+}

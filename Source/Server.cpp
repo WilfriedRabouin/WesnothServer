@@ -41,8 +41,7 @@ void AsyncAccept(boost::asio::ip::tcp::acceptor& acceptor, bool isClientCountLim
 			}
 			else
 			{
-				ClientHandler clientHandler{ std::move(socket) };
-				// TODO
+				ClientHandler{ std::move(socket) }.DoHandshake();
 			}
 			AsyncAccept(acceptor, isClientCountLimited, clientCountLimit);
 		});

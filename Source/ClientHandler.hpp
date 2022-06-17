@@ -19,6 +19,9 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <cstdint>
+#include <vector>
+
 #include <boost/asio.hpp>
 
 class ClientHandler
@@ -29,8 +32,11 @@ public:
 	explicit ClientHandler(boost::asio::ip::tcp::socket socket);
 	~ClientHandler();
 
+	void DoHandshake();
+
 private:
 	static std::size_t s_instanceCount;
 
 	boost::asio::ip::tcp::socket m_socket;
+	std::vector<std::uint8_t> m_receivedData{};
 };
