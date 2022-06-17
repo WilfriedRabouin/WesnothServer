@@ -58,9 +58,9 @@ void ClientHandler::AsyncHandshake()
 			}
 			else
 			{
-				// TODO: handle TLS
-				constexpr std::array<char, 4> expectedData{};
-				if (std::ranges::equal(m_inputData, expectedData))
+				constexpr std::array<char, 4> normalConnection{ 0, 0, 0, 0 };
+				constexpr std::array<char, 4> tlsConnection{ 0, 0, 0, 1 };
+				if (std::ranges::equal(m_inputData, normalConnection))
 				{
 					m_outputData = { '\xde', '\xad', '\xbe', '\xef' };
 					boost::asio::async_write(m_socket, boost::asio::buffer(m_outputData),
@@ -72,10 +72,15 @@ void ClientHandler::AsyncHandshake()
 							}
 							else
 							{
-								spdlog::info("{}: handshake done", GetAddressString());
+								spdlog::debug("{}: handshake done", GetAddressString());
 								// TODO
 							}
 						});
+				}
+				else if (std::ranges::equal(m_inputData, tlsConnection))
+				{
+					// TODO: implement TLS
+					spdlog::error("{}: TLS not implemented yet", GetAddressString());
 				}
 				else
 				{
