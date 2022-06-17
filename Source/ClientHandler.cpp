@@ -73,19 +73,19 @@ void ClientHandler::AsyncHandshake()
 					}
 					else
 					{
-						spdlog::debug("{}: handshake done", GetAddressString());
+						spdlog::debug("{}: handshake successful", GetAddressString());
 						// TODO
 					}
 				});
 		}
 		else if (std::ranges::equal(m_inputData, tlsConnection))
 		{
-			spdlog::warn("{}: handshake failed (TLS not implemented yet)", GetAddressString());
+			spdlog::warn("{}: handshake request failed (TLS not implemented yet)", GetAddressString());
 			// TODO: implement TLS
 		}
 		else
 		{
-			spdlog::error("{}: handshake failed (wrong data received from client)", GetAddressString());
+			spdlog::error("{}: handshake request failed (wrong data received from client)", GetAddressString());
 		}
 	});
 }
