@@ -41,7 +41,7 @@ ClientHandler::~ClientHandler()
 	--s_instanceCount;
 }
 
-void ClientHandler::DoHandshake()
+void ClientHandler::AsyncHandshake()
 {
 	m_receivedData.resize(4);
 

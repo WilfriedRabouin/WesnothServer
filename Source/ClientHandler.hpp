@@ -19,7 +19,6 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <cstdint>
 #include <vector>
 #include <memory>
 
@@ -33,7 +32,7 @@ public:
 
 	~ClientHandler();
 
-	void DoHandshake();
+	void AsyncHandshake();
 
 private:
 	explicit ClientHandler(boost::asio::ip::tcp::socket socket);
@@ -41,5 +40,5 @@ private:
 	static std::size_t s_instanceCount;
 
 	boost::asio::ip::tcp::socket m_socket;
-	std::vector<std::uint8_t> m_receivedData{};
+	std::vector<char> m_receivedData{};
 };
