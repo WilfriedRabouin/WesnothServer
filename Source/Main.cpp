@@ -18,16 +18,32 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <cstdlib>
+#include <string>
 
 #include <spdlog/spdlog.h>
 
 #include "Server.hpp"
 
-int main(int /*argc*/, char* /*argv*/[])
+int main(int argc, char* argv[])
 {
+	bool isClientCountLimited{ true };
+	std::size_t clientCountLimit{ 1 };
+
+	if (argc == 3 && argv[1] == std::string{ "--client-limit" })
+	{
+		if (argv[2] == std::string{ "none" })
+		{
+			isClientCountLimited = false;
+		}
+		else
+		{
+			clientCountLimit = std::stoull(argv[2]);
+		}
+	}
+
 	try
 	{
-		RunServer(true, 1);
+		RunServer(isClientCountLimited, clientCountLimit);
 		return EXIT_SUCCESS;
 	}
 	catch (const std::exception& e)
