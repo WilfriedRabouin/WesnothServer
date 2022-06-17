@@ -21,6 +21,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <vector>
 #include <memory>
+#include <string>
 
 #include <boost/asio.hpp>
 
@@ -31,6 +32,8 @@ public:
 	static [[nodiscard]] std::size_t GetInstanceCount();
 
 	~ClientHandler();
+
+	[[nodiscard]] std::string GetAddressString() const;
 
 	void AsyncHandshake();
 

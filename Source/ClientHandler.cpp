@@ -38,8 +38,13 @@ std::size_t ClientHandler::s_instanceCount{};
 
 ClientHandler::~ClientHandler()
 {
-	spdlog::info("{}: disconnected", m_socket.remote_endpoint().address().to_string());
+	spdlog::info("{}: disconnected", GetAddressString());
 	--s_instanceCount;
+}
+
+[[nodiscard]] std::string ClientHandler::GetAddressString() const
+{
+	return m_socket.remote_endpoint().address().to_string();
 }
 
 void ClientHandler::AsyncHandshake()
@@ -49,7 +54,7 @@ void ClientHandler::AsyncHandshake()
 		{
 			if (error)
 			{
-				spdlog::error("{}: handshake failed ({})", m_socket.remote_endpoint().address().to_string(), error.message());
+				spdlog::error("{}: handshake failed ({})", GetAddressString(), error.message());
 			}
 			else
 			{
@@ -63,18 +68,18 @@ void ClientHandler::AsyncHandshake()
 						{
 							if (error)
 							{
-								spdlog::error("{}: handshake failed ({})", m_socket.remote_endpoint().address().to_string(), error.message());
+								spdlog::error("{}: handshake failed ({})", GetAddressString(), error.message());
 							}
 							else
 							{
-								spdlog::info("{}: handshake done", m_socket.remote_endpoint().address().to_string());
+								spdlog::info("{}: handshake done", GetAddressString());
 								// TODO
 							}
 						});
 				}
 				else
 				{
-					spdlog::error("{}: handshake failed (wrong data received from client)", m_socket.remote_endpoint().address().to_string());
+					spdlog::error("{}: handshake failed (wrong data received from client)", GetAddressString());
 				}
 			}
 		});
@@ -83,6 +88,6 @@ void ClientHandler::AsyncHandshake()
 ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
 	: m_socket{ std::move(socket) }
 {
-	spdlog::info("{}: connected", m_socket.remote_endpoint().address().to_string());
+	spdlog::info("{}: connected", GetAddressString());
 	++s_instanceCount;
 }
