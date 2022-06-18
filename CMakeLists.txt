@@ -8,6 +8,8 @@ set (SPDLOG_NO_THREAD_ID ON)
 set (SPDLOG_NO_ATOMIC_LEVELS ON)
 add_subdirectory (spdlog)
 
+add_subdirectory (zlib)
+
 add_executable (${PROJECT_NAME}
 	Source/Main.cpp
 	Source/Server.hpp
@@ -23,7 +25,7 @@ set_target_properties (${PROJECT_NAME} PROPERTIES
 )
 
 target_include_directories (${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries (${PROJECT_NAME} PRIVATE spdlog::spdlog)
+target_link_libraries (${PROJECT_NAME} PRIVATE spdlog::spdlog zlibstatic)
 
 if (MSVC)
 	# TO FIX:
