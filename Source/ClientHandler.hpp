@@ -35,7 +35,7 @@ public:
 
 	[[nodiscard]] std::string GetAddressString() const;
 
-	void AsyncHandshake();
+	void StartHandshake();
 
 private:
 	explicit ClientHandler(boost::asio::ip::tcp::socket socket);

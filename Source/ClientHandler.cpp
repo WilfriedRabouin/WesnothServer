@@ -48,7 +48,7 @@ ClientHandler::~ClientHandler()
 	return m_socket.remote_endpoint().address().to_string();
 }
 
-void ClientHandler::AsyncHandshake()
+void ClientHandler::StartHandshake()
 {
 	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, 4),
 		[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
