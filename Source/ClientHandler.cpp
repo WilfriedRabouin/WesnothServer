@@ -22,6 +22,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 
 #include <spdlog/spdlog.h>
+// TODO: include zlib.h
 
 #include "ClientHandler.hpp"
 
@@ -74,7 +75,7 @@ void ClientHandler::StartHandshake()
 					else
 					{
 						spdlog::debug("{}: handshake successful", GetAddressString());
-						// TODO
+						SendGamelistMessage();
 					}
 				});
 		}
@@ -95,4 +96,34 @@ ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
 {
 	spdlog::info("{}: connected", GetAddressString());
 	++s_instanceCount;
+}
+
+void ClientHandler::SendMessage(std::string_view message)
+{
+	// TODO:
+	// 1) compress
+	// 2) add length
+	// 3) send
+
+
+}
+
+void ClientHandler::SendJoinLobbyMessage()
+{
+	constexpr std::string_view message{
+		"[join_lobby]\n" \
+		"    is_moderator=no\n" \
+		"    profile_url_prefix=\"\"\n" \
+		"[/join_lobby]" };
+
+	SendMessage(message);
+}
+
+void ClientHandler::SendGamelistMessage()
+{
+	constexpr std::string_view message{
+		"[gamelist]\n" \
+		"[/gamelist]" };
+
+	SendMessage(message);
 }

@@ -22,6 +22,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <vector>
 #include <memory>
 #include <string>
+#include <string_view>
 
 #include <boost/asio.hpp>
 
@@ -39,6 +40,10 @@ public:
 
 private:
 	explicit ClientHandler(boost::asio::ip::tcp::socket socket);
+
+	void SendMessage(std::string_view message);
+	void SendJoinLobbyMessage();
+	void SendGamelistMessage();
 
 	static std::size_t s_instanceCount;
 
