@@ -28,6 +28,5 @@ target_include_directories (${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries (${PROJECT_NAME} PRIVATE spdlog::spdlog zlibstatic)
 
 if (MSVC)
-	# TO FIX:
-	#target_compile_options (${PROJECT_NAME} PRIVATE /Wall /WX)
+	target_compile_options (${PROJECT_NAME} PRIVATE /W3 /WX)
 endif ()
