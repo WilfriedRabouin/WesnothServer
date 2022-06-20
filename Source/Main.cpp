@@ -26,6 +26,10 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 int main(int argc, char* argv[])
 {
+#ifdef _DEBUG
+	spdlog::set_level(spdlog::level::debug);
+#endif // _DEBUG
+
 	bool isClientCountLimited{ true };
 	std::size_t clientCountLimit{ 1 };
 
