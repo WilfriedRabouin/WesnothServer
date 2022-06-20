@@ -24,5 +24,5 @@ target_include_directories (${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries (${PROJECT_NAME} PRIVATE spdlog::spdlog ZLIB::ZLIB)
 
 if (MSVC)
-	target_compile_options (${PROJECT_NAME} PRIVATE /W3 /WX)
+	target_compile_options (${PROJECT_NAME} PRIVATE /W4 /WX)
 endif ()

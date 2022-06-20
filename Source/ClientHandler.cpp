@@ -54,8 +54,8 @@ void ClientHandler::StartHandshake()
 	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, 4),
 		[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 	{
-		constexpr std::array<char, 4> normalConnection{ 0, 0, 0, 0 };
-		constexpr std::array<char, 4> tlsConnection{ 0, 0, 0, 1 };
+		constexpr std::array<char, 4> normalConnection{ { 0, 0, 0, 0 } };
+		constexpr std::array<char, 4> tlsConnection{ { 0, 0, 0, 1 } };
 
 		if (error)
 		{
@@ -98,14 +98,12 @@ ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
 	++s_instanceCount;
 }
 
-void ClientHandler::SendMessage(std::string_view message)
+void ClientHandler::SendMessage(std::string_view /*message*/)
 {
 	// TODO:
 	// 1) compress
 	// 2) add length
 	// 3) send
-
-
 }
 
 void ClientHandler::SendJoinLobbyMessage()

@@ -29,8 +29,8 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 class ClientHandler : public std::enable_shared_from_this<ClientHandler>
 {
 public:
-	static [[nodiscard]] std::shared_ptr<ClientHandler> create(boost::asio::ip::tcp::socket socket);
-	static [[nodiscard]] std::size_t GetInstanceCount();
+	[[nodiscard]] static std::shared_ptr<ClientHandler> create(boost::asio::ip::tcp::socket socket);
+	[[nodiscard]] static std::size_t GetInstanceCount();
 
 	~ClientHandler();
 
