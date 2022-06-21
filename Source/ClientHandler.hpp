@@ -39,7 +39,7 @@ public:
 private:
 	explicit ClientHandler(boost::asio::ip::tcp::socket socket);
 
-	[[nodiscard]] std::string GetIpAddress() const;
+	[[nodiscard]] std::string GetAddress() const;
 
 	void Send(std::string_view message);
 	void SendJoinLobbyMessage();
