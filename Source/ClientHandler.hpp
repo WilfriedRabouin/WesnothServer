@@ -19,6 +19,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <cstdint>
 #include <vector>
 #include <memory>
 #include <string>
@@ -48,6 +49,6 @@ private:
 	static std::size_t s_instanceCount;
 
 	boost::asio::ip::tcp::socket m_socket;
-	std::vector<char> m_inputData{};
-	std::vector<char> m_outputData{};
+	std::vector<std::uint8_t> m_inputData{};
+	std::vector<std::uint8_t> m_outputData{};
 };

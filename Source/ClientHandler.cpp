@@ -58,7 +58,7 @@ void ClientHandler::StartHandshake()
 		}
 		else if (std::ranges::equal(m_inputData, normalConnection))
 		{
-			m_outputData = { '\xde', '\xad', '\xbe', '\xef' };
+			m_outputData = { 0xDE, 0xAD, 0xBE, 0xEF };
 
 			boost::asio::async_write(m_socket, boost::asio::buffer(m_outputData),
 				[this, self](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
@@ -98,12 +98,41 @@ ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
 	return m_socket.remote_endpoint().address().to_string();
 }
 
-void ClientHandler::Send(std::string_view /*message*/)
+void ClientHandler::Send(std::string_view message)
 {
-	// TODO:
-	// 1) compress
-	// 2) add length
-	// 3) send
+	const Bytef* source{ reinterpret_cast<const Bytef*>(message.data()) };
+	const uLong sourceLen{ static_cast<uLong>(message.size()) };
+	uLongf destLen{ compressBound(sourceLen) };
+
+	constexpr std::size_t sizeFieldLength{ 4 };
+	m_outputData.resize(destLen + sizeFieldLength);
+	Bytef* dest{ m_outputData.data() + sizeFieldLength };
+
+	const int result = compress(dest, &destLen, source, sourceLen);
+	if (result == Z_OK)
+	{
+		m_outputData[0] = (destLen >> 24) & 0xFF;
+		m_outputData[1] = (destLen >> 16) & 0xFF;
+		m_outputData[2] = (destLen >> 8) & 0xFF;
+		m_outputData[3] = (destLen >> 0) & 0xFF;
+
+		boost::asio::async_write(m_socket, boost::asio::buffer(m_outputData),
+			[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+			{
+				if (error)
+				{
+					spdlog::error("{}: fail ({})", GetAddress(), error.message());
+				}
+				else
+				{
+					spdlog::debug("{}: success", GetAddress());
+				}
+			});
+	}
+	else
+	{
+		spdlog::error("{}: compression failed", GetAddress());
+	}
 }
 
 void ClientHandler::SendJoinLobbyMessage()
