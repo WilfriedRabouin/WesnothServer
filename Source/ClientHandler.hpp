@@ -34,14 +34,14 @@ public:
 
 	~ClientHandler();
 
-	[[nodiscard]] std::string GetAddressString() const;
-
 	void StartHandshake();
 
 private:
 	explicit ClientHandler(boost::asio::ip::tcp::socket socket);
 
-	void SendMessage(std::string_view message);
+	[[nodiscard]] std::string GetAddressString() const;
+
+	void Send(std::string_view message);
 	void SendJoinLobbyMessage();
 	void SendGamelistMessage();
 

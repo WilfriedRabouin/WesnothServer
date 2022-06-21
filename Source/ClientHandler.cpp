@@ -22,7 +22,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 
 #include <spdlog/spdlog.h>
-// TODO: include zlib.h
+#include <zlib.h>
 
 #include "ClientHandler.hpp"
 
@@ -42,11 +42,6 @@ ClientHandler::~ClientHandler()
 {
 	spdlog::info("{}: disconnected", GetAddressString());
 	--s_instanceCount;
-}
-
-[[nodiscard]] std::string ClientHandler::GetAddressString() const
-{
-	return m_socket.remote_endpoint().address().to_string();
 }
 
 void ClientHandler::StartHandshake()
@@ -98,7 +93,12 @@ ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
 	++s_instanceCount;
 }
 
-void ClientHandler::SendMessage(std::string_view /*message*/)
+[[nodiscard]] std::string ClientHandler::GetAddressString() const
+{
+	return m_socket.remote_endpoint().address().to_string();
+}
+
+void ClientHandler::Send(std::string_view /*message*/)
 {
 	// TODO:
 	// 1) compress
@@ -114,7 +114,7 @@ void ClientHandler::SendJoinLobbyMessage()
 		"    profile_url_prefix=\"\"\n" \
 		"[/join_lobby]" };
 
-	SendMessage(message);
+	Send(message);
 }
 
 void ClientHandler::SendGamelistMessage()
@@ -123,5 +123,5 @@ void ClientHandler::SendGamelistMessage()
 		"[gamelist]\n" \
 		"[/gamelist]" };
 
-	SendMessage(message);
+	Send(message);
 }
