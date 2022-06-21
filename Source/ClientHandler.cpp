@@ -40,7 +40,7 @@ std::size_t ClientHandler::s_instanceCount{};
 
 ClientHandler::~ClientHandler()
 {
-	spdlog::info("{}: disconnected", GetAddressString());
+	spdlog::info("{}: disconnected", GetAddress());
 	--s_instanceCount;
 }
 
@@ -54,7 +54,7 @@ void ClientHandler::StartHandshake()
 
 		if (error)
 		{
-			spdlog::error("{}: handshake request failed ({})", GetAddressString(), error.message());
+			spdlog::error("{}: handshake request failed ({})", GetAddress(), error.message());
 		}
 		else if (std::ranges::equal(m_inputData, normalConnection))
 		{
@@ -65,23 +65,23 @@ void ClientHandler::StartHandshake()
 				{
 					if (error)
 					{
-						spdlog::error("{}: handshake response failed ({})", GetAddressString(), error.message());
+						spdlog::error("{}: handshake response failed ({})", GetAddress(), error.message());
 					}
 					else
 					{
-						spdlog::debug("{}: handshake successful", GetAddressString());
+						spdlog::debug("{}: handshake successful", GetAddress());
 						SendGamelistMessage();
 					}
 				});
 		}
 		else if (std::ranges::equal(m_inputData, tlsConnection))
 		{
-			spdlog::warn("{}: handshake request failed (TLS not implemented yet)", GetAddressString());
+			spdlog::warn("{}: handshake request failed (TLS not implemented yet)", GetAddress());
 			// TODO: implement TLS
 		}
 		else
 		{
-			spdlog::error("{}: handshake request failed (wrong data received from client)", GetAddressString());
+			spdlog::error("{}: handshake request failed (wrong data received from client)", GetAddress());
 		}
 	});
 }
@@ -89,11 +89,11 @@ void ClientHandler::StartHandshake()
 ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
 	: m_socket{ std::move(socket) }
 {
-	spdlog::info("{}: connected", GetAddressString());
+	spdlog::info("{}: connected", GetAddress());
 	++s_instanceCount;
 }
 
-[[nodiscard]] std::string ClientHandler::GetAddressString() const
+[[nodiscard]] std::string ClientHandler::GetAddress() const
 {
 	return m_socket.remote_endpoint().address().to_string();
 }
