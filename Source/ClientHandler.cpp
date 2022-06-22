@@ -49,8 +49,8 @@ void ClientHandler::StartHandshake()
 	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, 4),
 		[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 	{
-		constexpr std::array<char, 4> normalConnection{ { 0, 0, 0, 0 } };
-		constexpr std::array<char, 4> tlsConnection{ { 0, 0, 0, 1 } };
+		constexpr std::array<std::uint8_t, 4> normalConnection{ { 0, 0, 0, 0 } };
+		constexpr std::array<std::uint8_t, 4> tlsConnection{ { 0, 0, 0, 1 } };
 
 		if (error)
 		{
@@ -60,7 +60,7 @@ void ClientHandler::StartHandshake()
 		{
 			m_outputData = { 0xDE, 0xAD, 0xBE, 0xEF };
 
-			boost::asio::async_write(m_socket, boost::asio::buffer(m_outputData),
+			boost::asio::async_write(m_socket, boost::asio::dynamic_buffer(m_outputData, 4),
 				[this, self](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 				{
 					if (error)
@@ -116,7 +116,7 @@ void ClientHandler::Send(std::string_view message)
 		m_outputData[2] = (destLen >> 8) & 0xFF;
 		m_outputData[3] = (destLen >> 0) & 0xFF;
 
-		boost::asio::async_write(m_socket, boost::asio::buffer(m_outputData),
+		boost::asio::async_write(m_socket, boost::asio::dynamic_buffer(m_outputData, destLen),
 			[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 			{
 				if (error)
