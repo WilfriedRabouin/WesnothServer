@@ -25,7 +25,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include "Server.hpp"
 #include "ClientHandler.hpp"
 
-void AsyncAccept(boost::asio::ip::tcp::acceptor& acceptor, bool isClientCountLimited, std::size_t clientCountLimit)
+void Accept(boost::asio::ip::tcp::acceptor& acceptor, bool isClientCountLimited, std::size_t clientCountLimit)
 {
 	acceptor.async_accept(
 		[&acceptor, isClientCountLimited, clientCountLimit](const boost::system::error_code& error, boost::asio::ip::tcp::socket socket)
@@ -42,7 +42,7 @@ void AsyncAccept(boost::asio::ip::tcp::acceptor& acceptor, bool isClientCountLim
 			{
 				ClientHandler::create(std::move(socket))->StartHandshake();
 			}
-			AsyncAccept(acceptor, isClientCountLimited, clientCountLimit);
+			Accept(acceptor, isClientCountLimited, clientCountLimit);
 		});
 }
 
@@ -52,6 +52,6 @@ void RunServer(bool isClientCountLimited, std::size_t clientCountLimit)
 	const boost::asio::ip::tcp::endpoint endpoint{ boost::asio::ip::tcp::v4(), port };
 	boost::asio::io_context ioContext{};
 	boost::asio::ip::tcp::acceptor acceptor{ ioContext, endpoint };
-	AsyncAccept(acceptor, isClientCountLimited, clientCountLimit);
+	Accept(acceptor, isClientCountLimited, clientCountLimit);
 	ioContext.run();
 }
