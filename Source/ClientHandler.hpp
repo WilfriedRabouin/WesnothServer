@@ -42,6 +42,7 @@ private:
 
 	[[nodiscard]] std::string GetAddress() const;
 
+	void Receive();
 	void Send(std::string_view message);
 	void SendJoinLobbyMessage();
 	void SendGamelistMessage();

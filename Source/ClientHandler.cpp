@@ -71,6 +71,7 @@ void ClientHandler::StartHandshake()
 					{
 						spdlog::debug("{}: handshake successful", GetAddress());
 						SendGamelistMessage();
+						Receive();
 					}
 				});
 		}
@@ -98,6 +99,49 @@ ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
 	return m_socket.remote_endpoint().address().to_string();
 }
 
+void ClientHandler::Receive()
+{
+	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, 4),
+		[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+	{
+		if (error)
+		{
+			spdlog::error("{}: receiving failed ({})", GetAddress(), error.message());
+		}
+		else
+		{
+			const std::size_t size{ static_cast<std::size_t>((m_inputData[0] << 24) | (m_inputData[0] << 16) | (m_inputData[0] << 8) | (m_inputData[0] << 0)) };
+			boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, size),
+				[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+			{
+				if (error)
+				{
+					spdlog::error("{}: receiving failed ({})", GetAddress(), error.message());
+				}
+				else
+				{
+					const Bytef* source{ m_inputData.data() };
+					const uLong sourceLen{ static_cast<uLong>(m_inputData.size()) };
+
+					uLongf destLen{ sourceLen * 4 };
+					std::vector<std::uint8_t> data(destLen, 0);
+					Bytef* dest{ data.data() };
+
+					const int result = uncompress(dest, &destLen, source, sourceLen);
+					if (result == Z_OK)
+					{
+						spdlog::error("{}: receiving successful", GetAddress());
+					}
+					else
+					{
+						spdlog::error("{}: receiving failed (uncompression failed)", GetAddress());
+					}
+				}
+			});
+		}
+	});
+}
+
 void ClientHandler::Send(std::string_view message)
 {
 	const Bytef* source{ reinterpret_cast<const Bytef*>(message.data()) };
@@ -118,20 +162,20 @@ void ClientHandler::Send(std::string_view message)
 
 		boost::asio::async_write(m_socket, boost::asio::dynamic_buffer(m_outputData, destLen),
 			[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+		{
+			if (error)
 			{
-				if (error)
-				{
-					spdlog::error("{}: fail ({})", GetAddress(), error.message());
-				}
-				else
-				{
-					spdlog::debug("{}: success", GetAddress());
-				}
-			});
+				spdlog::error("{}: sending failed ({})", GetAddress(), error.message());
+			}
+			else
+			{
+				spdlog::debug("{}: sending successful", GetAddress());
+			}
+		});
 	}
 	else
 	{
-		spdlog::error("{}: compression failed", GetAddress());
+		spdlog::error("{}: sending failed (compression failed)", GetAddress());
 	}
 }
 
