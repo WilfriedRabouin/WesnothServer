@@ -46,11 +46,13 @@ ClientHandler::~ClientHandler()
 
 void ClientHandler::StartHandshake()
 {
-	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, 4),
+	constexpr std::size_t requestSize{ 4 };
+
+	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, requestSize),
 		[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 	{
-		constexpr std::array<std::uint8_t, 4> normalConnection{ { 0, 0, 0, 0 } };
-		constexpr std::array<std::uint8_t, 4> tlsConnection{ { 0, 0, 0, 1 } };
+		constexpr std::array<std::uint8_t, requestSize> normalConnection{ { 0, 0, 0, 0 } };
+		constexpr std::array<std::uint8_t, requestSize> tlsConnection{ { 0, 0, 0, 1 } };
 
 		if (error)
 		{
@@ -60,7 +62,7 @@ void ClientHandler::StartHandshake()
 		{
 			m_outputData = { 0xDE, 0xAD, 0xBE, 0xEF };
 
-			boost::asio::async_write(m_socket, boost::asio::dynamic_buffer(m_outputData, 4),
+			boost::asio::async_write(m_socket, boost::asio::buffer(m_outputData),
 				[this, self](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 				{
 					if (error)
@@ -82,7 +84,7 @@ void ClientHandler::StartHandshake()
 		}
 		else
 		{
-			spdlog::error("{}: handshake request failed (wrong data received from client)", GetAddress());
+			spdlog::error("{}: handshake request failed (wrong data)", GetAddress());
 		}
 	});
 }
@@ -112,32 +114,32 @@ void ClientHandler::Receive()
 		{
 			const std::size_t size{ static_cast<std::size_t>((m_inputData[0] << 24) | (m_inputData[0] << 16) | (m_inputData[0] << 8) | (m_inputData[0] << 0)) };
 			boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, size),
-				[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
-			{
-				if (error)
+				[this, self](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 				{
-					spdlog::error("{}: receiving failed ({})", GetAddress(), error.message());
-				}
-				else
-				{
-					const Bytef* source{ m_inputData.data() };
-					const uLong sourceLen{ static_cast<uLong>(m_inputData.size()) };
-
-					uLongf destLen{ sourceLen * 4 };
-					std::vector<std::uint8_t> data(destLen, 0);
-					Bytef* dest{ data.data() };
-
-					const int result = uncompress(dest, &destLen, source, sourceLen);
-					if (result == Z_OK)
+					if (error)
 					{
-						spdlog::error("{}: receiving successful", GetAddress());
+						spdlog::error("{}: receiving failed ({})", GetAddress(), error.message());
 					}
 					else
 					{
-						spdlog::error("{}: receiving failed (uncompression failed)", GetAddress());
+						const Bytef* source{ m_inputData.data() };
+						const uLong sourceLen{ static_cast<uLong>(m_inputData.size()) };
+
+						uLongf destLen{ sourceLen * 4 };
+						std::vector<std::uint8_t> data(destLen, 0);
+						Bytef* dest{ data.data() };
+
+						const int result = uncompress(dest, &destLen, source, sourceLen);
+						if (result == Z_OK)
+						{
+							spdlog::error("{}: receiving successful", GetAddress());
+						}
+						else
+						{
+							spdlog::error("{}: receiving failed (uncompression failed)", GetAddress());
+						}
 					}
-				}
-			});
+				});
 		}
 	});
 }
