@@ -132,7 +132,7 @@ void ClientHandler::Receive()
 						const int result = uncompress(dest, &destLen, source, sourceLen);
 						if (result == Z_OK)
 						{
-							spdlog::error("{}: receiving successful", GetAddress());
+							spdlog::debug("{}: receiving successful", GetAddress());
 						}
 						else
 						{
