@@ -45,9 +45,6 @@ private:
 	void Receive();
 	void Send(std::string_view message);
 
-	void SendJoinLobbyMessage();
-	void SendGamelistMessage();
-
 	static std::size_t s_instanceCount;
 
 	boost::asio::ip::tcp::socket m_socket;
