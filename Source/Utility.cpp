@@ -27,22 +27,22 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace Utility
 {
-	[[nodiscard]] std::string Compress(const char* source, std::size_t sourceSize)
+	[[nodiscard]] std::string Compress(std::string_view message)
 	{
 		boost::iostreams::filtering_istreambuf buffer{};
-		buffer.push(boost::iostreams::gzip_compressor());
-		buffer.push(boost::iostreams::array_source{ source, sourceSize });
+		buffer.push(boost::iostreams::gzip_compressor{});
+		buffer.push(boost::iostreams::array_source{ message.data(), message.size() });
 
 		std::stringstream stringStream{};
 		boost::iostreams::copy(buffer, stringStream);
 		return stringStream.str();
 	}
 
-	[[nodiscard]] std::string Uncompress(const char* source, std::size_t sourceSize)
+	[[nodiscard]] std::string Uncompress(std::string_view message)
 	{
 		boost::iostreams::filtering_istreambuf buffer{};
-		buffer.push(boost::iostreams::gzip_decompressor());
-		buffer.push(boost::iostreams::array_source{ source, sourceSize });
+		buffer.push(boost::iostreams::gzip_decompressor{});
+		buffer.push(boost::iostreams::array_source{ message.data(), message.size() });
 
 		std::stringstream stringStream{};
 		boost::iostreams::copy(buffer, stringStream);

@@ -19,8 +19,11 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <string>
+#include <string_view>
+
 namespace Utility
 {
-	[[nodiscard]] std::string Compress(const char* source, std::size_t sourceSize);
-	[[nodiscard]] std::string Uncompress(const char* source, std::size_t sourceSize);
+	[[nodiscard]] std::string Compress(std::string_view message);
+	[[nodiscard]] std::string Uncompress(std::string_view message);
 }
