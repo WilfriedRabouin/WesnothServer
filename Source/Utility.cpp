@@ -18,6 +18,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <sstream>
+#include <utility>
 
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
@@ -27,25 +28,25 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace Utility
 {
-	[[nodiscard]] std::string Compress(std::string_view message)
+	[[nodiscard]] std::string Compress(std::string_view data)
 	{
 		boost::iostreams::filtering_istreambuf buffer{};
 		buffer.push(boost::iostreams::gzip_compressor{});
-		buffer.push(boost::iostreams::array_source{ message.data(), message.size() });
+		buffer.push(boost::iostreams::array_source{ data.data(), data.size() });
 
 		std::stringstream stringStream{};
 		boost::iostreams::copy(buffer, stringStream);
-		return stringStream.str();
+		return std::move(stringStream).str();
 	}
 
-	[[nodiscard]] std::string Uncompress(std::string_view message)
+	[[nodiscard]] std::string Uncompress(std::string_view data)
 	{
 		boost::iostreams::filtering_istreambuf buffer{};
 		buffer.push(boost::iostreams::gzip_decompressor{});
-		buffer.push(boost::iostreams::array_source{ message.data(), message.size() });
+		buffer.push(boost::iostreams::array_source{ data.data(), data.size() });
 
 		std::stringstream stringStream{};
 		boost::iostreams::copy(buffer, stringStream);
-		return stringStream.str();
+		return std::move(stringStream).str();
 	}
 }
