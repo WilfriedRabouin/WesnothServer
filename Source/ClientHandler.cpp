@@ -28,6 +28,8 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include "ClientHandler.hpp"
 #include "Gzip.hpp"
 
+using SizeField = std::uint32_t;
+
 constexpr std::string_view versionMessage{
 	"[version]\n"
 	"[/version]"
@@ -75,14 +77,14 @@ void ClientHandler::StartHandshake()
 	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, requestSize),
 		[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 	{
-		constexpr std::array<std::uint8_t, requestSize> normalConnection{ { 0, 0, 0, 0 } };
-		constexpr std::array<std::uint8_t, requestSize> tlsConnection{ { 0, 0, 0, 1 } };
+		constexpr std::array<std::uint8_t, requestSize> normalConnectionRequest{ { 0, 0, 0, 0 } };
+		constexpr std::array<std::uint8_t, requestSize> tlsConnectionRequest{ { 0, 0, 0, 1 } };
 
 		if (error)
 		{
 			spdlog::error("{}: handshake request failed ({})", GetAddress(), error.message());
 		}
-		else if (std::ranges::equal(m_inputData, normalConnection))
+		else if (std::ranges::equal(m_inputData, normalConnectionRequest))
 		{
 			m_outputData = { 0xDE, 0xAD, 0xBE, 0xEF };
 
@@ -100,7 +102,7 @@ void ClientHandler::StartHandshake()
 					}
 				});
 		}
-		else if (std::ranges::equal(m_inputData, tlsConnection))
+		else if (std::ranges::equal(m_inputData, tlsConnectionRequest))
 		{
 			spdlog::warn("{}: handshake request failed (TLS not implemented yet)", GetAddress());
 			// TODO: implement TLS
@@ -136,11 +138,11 @@ void ClientHandler::StartLogin()
 	//spdlog::info("{}: login successful", GetAddress());
 }
 
-void ClientHandler::Receive(std::function<void(const std::string&)> completionHandler)
+void ClientHandler::Receive(std::function<void(std::string&&)> completionHandler)
 {
 	spdlog::debug("{}: receiving", GetAddress());
 
-	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, sizeof(std::uint32_t)),
+	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, sizeof(SizeField)),
 		[this, self = shared_from_this(), completionHandler](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 	{
 		if (error)
@@ -149,8 +151,8 @@ void ClientHandler::Receive(std::function<void(const std::string&)> completionHa
 		}
 		else
 		{
-			std::uint32_t sizeField{};
-			std::memcpy(&sizeField, m_inputData.data(), sizeof(sizeField));
+			SizeField sizeField{};
+			std::memcpy(&sizeField, m_inputData.data(), sizeof(SizeField));
 
 			const std::size_t dataSize{ _byteswap_ulong(sizeField) };
 			spdlog::debug("{}: Receiving {} bytes", GetAddress(), dataSize);
@@ -168,7 +170,6 @@ void ClientHandler::Receive(std::function<void(const std::string&)> completionHa
 						//completionHandler(message);
 					}
 				});
-
 		}
 	});
 }
@@ -176,11 +177,11 @@ void ClientHandler::Receive(std::function<void(const std::string&)> completionHa
 void ClientHandler::Send(std::string_view message, std::function<void()> completionHandler)
 {
 	const std::string data{ Gzip::Compress(message) };
-	const std::uint32_t sizeField{ _byteswap_ulong(static_cast<std::uint32_t>(data.size())) }; // TODO C++23: replace _byteswap_ulong with std::byteswap
+	const SizeField sizeField{ _byteswap_ulong(static_cast<SizeField>(data.size())) }; // TODO C++23: replace _byteswap_ulong with std::byteswap
 
-	m_outputData.resize(sizeof(sizeField) + data.size());
-	std::memcpy(m_outputData.data(), &sizeField, sizeof(sizeField));
-	std::memcpy(m_outputData.data() + sizeof(sizeField), data.data(), data.size());
+	m_outputData.resize(sizeof(SizeField) + data.size());
+	std::memcpy(m_outputData.data(), &sizeField, sizeof(SizeField));
+	std::memcpy(m_outputData.data() + sizeof(SizeField), data.data(), data.size());
 
 	spdlog::debug("{}: sending {} bytes\n{}", GetAddress(), m_outputData.size(), message);
 
