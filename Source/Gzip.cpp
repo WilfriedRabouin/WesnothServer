@@ -28,22 +28,22 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace Gzip
 {
-	[[nodiscard]] std::string Compress(const char* data, std::size_t size)
+	[[nodiscard]] std::string Compress(std::string_view data)
 	{
 		boost::iostreams::filtering_istreambuf buffer{};
 		buffer.push(boost::iostreams::gzip_compressor{});
-		buffer.push(boost::iostreams::array_source{ data, size });
+		buffer.push(boost::iostreams::array_source{ data.data(), data.size() });
 
 		std::stringstream stringStream{};
 		boost::iostreams::copy(buffer, stringStream);
 		return std::move(stringStream).str();
 	}
 
-	[[nodiscard]] std::string Uncompress(const char* data, std::size_t size)
+	[[nodiscard]] std::string Uncompress(std::string_view data)
 	{
 		boost::iostreams::filtering_istreambuf buffer{};
 		buffer.push(boost::iostreams::gzip_decompressor{});
-		buffer.push(boost::iostreams::array_source{ data, size });
+		buffer.push(boost::iostreams::array_source{ data.data(), data.size() });
 
 		std::stringstream stringStream{};
 		boost::iostreams::copy(buffer, stringStream);

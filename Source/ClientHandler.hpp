@@ -19,7 +19,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <cstdint>
+#include <cstdint> // std::uint8_t
 #include <vector>
 #include <memory> // std::enable_shared_from_this, std::shared_ptr
 #include <string>
@@ -45,12 +45,12 @@ private:
 
 	void StartLogin();
 
-	void Receive(std::function<void(std::string&&)> completionHandler);
+	void Receive(std::function<void(const std::string&)> completionHandler);
 	void Send(std::string_view message, std::function<void()> completionHandler);
 
 	static std::size_t s_instanceCount;
 
 	boost::asio::ip::tcp::socket m_socket;
-	std::vector<std::uint8_t> m_inputData{};
-	std::vector<std::uint8_t> m_outputData{};
+	std::vector<std::uint8_t> m_readData{};
+	std::vector<std::uint8_t> m_writeData{};
 };

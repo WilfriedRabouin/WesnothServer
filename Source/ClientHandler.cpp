@@ -74,7 +74,7 @@ void ClientHandler::StartHandshake()
 {
 	constexpr std::size_t requestSize{ 4 };
 
-	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, requestSize),
+	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_readData, requestSize),
 		[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 	{
 		constexpr std::array<std::uint8_t, requestSize> normalConnectionRequest{ { 0, 0, 0, 0 } };
@@ -84,11 +84,11 @@ void ClientHandler::StartHandshake()
 		{
 			spdlog::error("{}: handshake request failed ({})", GetAddress(), error.message());
 		}
-		else if (std::ranges::equal(m_inputData, normalConnectionRequest))
+		else if (std::ranges::equal(m_readData, normalConnectionRequest))
 		{
-			m_outputData = { 0xDE, 0xAD, 0xBE, 0xEF };
+			m_writeData = { 0xDE, 0xAD, 0xBE, 0xEF };
 
-			boost::asio::async_write(m_socket, boost::asio::buffer(m_outputData),
+			boost::asio::async_write(m_socket, boost::asio::buffer(m_writeData),
 				[this, self](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 				{
 					if (error)
@@ -102,7 +102,7 @@ void ClientHandler::StartHandshake()
 					}
 				});
 		}
-		else if (std::ranges::equal(m_inputData, tlsConnectionRequest))
+		else if (std::ranges::equal(m_readData, tlsConnectionRequest))
 		{
 			spdlog::warn("{}: handshake request failed (TLS not implemented yet)", GetAddress());
 			// TODO: implement TLS
@@ -138,9 +138,9 @@ void ClientHandler::StartLogin()
 	//spdlog::info("{}: login successful", GetAddress());
 }
 
-void ClientHandler::Receive(std::function<void(std::string&&)> completionHandler)
+void ClientHandler::Receive(std::function<void(const std::string&)> completionHandler)
 {
-	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, sizeof(SizeField)),
+	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_readData, sizeof(SizeField)),
 		[this, self = shared_from_this(), completionHandler](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 	{
 		if (error)
@@ -149,10 +149,10 @@ void ClientHandler::Receive(std::function<void(std::string&&)> completionHandler
 		}
 		else
 		{
-			const SizeField sizeField{ *reinterpret_cast<SizeField*>(m_inputData.data()) };
+			const SizeField sizeField{ *reinterpret_cast<SizeField*>(m_readData.data()) };
 			const std::size_t dataSize{ _byteswap_ulong(sizeField) }; // TODO C++23: replace _byteswap_ulong with std::byteswap
 
-			boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, dataSize),
+			boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_readData, dataSize),
 				[this, self, completionHandler](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 				{
 					if (error)
@@ -161,11 +161,10 @@ void ClientHandler::Receive(std::function<void(std::string&&)> completionHandler
 					}
 					else
 					{
-						const std::string_view data{ reinterpret_cast<char*>(m_inputData.data()), m_inputData.size() };
-						Gzip::Uncompress();
-
-						//spdlog::debug("{}: receiving x bytes\nx", GetAddress());
-						//completionHandler(message);
+						const std::string_view data{ reinterpret_cast<char*>(m_readData.data()), m_readData.size() };
+						const std::string message{ Gzip::Uncompress(data) };
+						spdlog::debug("{}: receiving {} bytes\n{}", GetAddress(), m_readData.size() + sizeof(SizeField), message);
+						completionHandler(message);
 					}
 				});
 		}
@@ -177,13 +176,13 @@ void ClientHandler::Send(std::string_view message, std::function<void()> complet
 	const std::string data{ Gzip::Compress(message) };
 	const SizeField sizeField{ _byteswap_ulong(static_cast<SizeField>(data.size())) }; // TODO C++23: replace _byteswap_ulong with std::byteswap
 
-	m_outputData.resize(sizeof(sizeField) + data.size());
-	std::memcpy(m_outputData.data(), &sizeField, sizeof(sizeField));
-	std::memcpy(m_outputData.data() + sizeof(sizeField), data.data(), data.size());
+	m_writeData.resize(sizeof(sizeField) + data.size());
+	std::memcpy(m_writeData.data(), &sizeField, sizeof(sizeField));
+	std::memcpy(m_writeData.data() + sizeof(sizeField), data.data(), data.size());
 
-	spdlog::debug("{}: sending {} bytes\n{}", GetAddress(), m_outputData.size(), message);
+	spdlog::debug("{}: sending {} bytes\n{}", GetAddress(), m_writeData.size(), message);
 
-	boost::asio::async_write(m_socket, boost::asio::buffer(m_outputData),
+	boost::asio::async_write(m_socket, boost::asio::buffer(m_writeData),
 		[this, self = shared_from_this(), completionHandler](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 	{
 		if (error)
