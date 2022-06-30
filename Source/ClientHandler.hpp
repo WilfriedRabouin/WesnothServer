@@ -21,9 +21,10 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <cstdint>
 #include <vector>
-#include <memory>
+#include <memory> // std::enable_shared_from_this, std::shared_ptr
 #include <string>
 #include <string_view>
+#include <functional> // std::function
 
 #include <boost/asio.hpp>
 
@@ -44,8 +45,8 @@ private:
 
 	void StartLogin();
 
-	void Receive();
-	void Send(std::string_view message);
+	void Receive(std::function<void()> completionHandler);
+	void Send(std::string_view message, std::function<void()> completionHandler);
 
 	static std::size_t s_instanceCount;
 

@@ -127,11 +127,11 @@ ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
 // WIP
 void ClientHandler::StartLogin()
 {
-	Send(versionMessage);
+	Send(versionMessage, [] {});
 	//spdlog::info("{}: login successful", GetAddress());
 }
 
-void ClientHandler::Receive()
+void ClientHandler::Receive(std::function<void()> /*completionHandler*/)
 {
 	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, 4),
 		[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
@@ -163,12 +163,12 @@ void ClientHandler::Receive()
 	});
 }
 
-void ClientHandler::Send(std::string_view message)
+void ClientHandler::Send(std::string_view message, std::function<void()> /*completionHandler*/)
 {
 	spdlog::debug("{}: sending:\n{}", GetAddress(), message);
 
 	const std::string data{ Gzip::Compress(message) };
-	const std::uint32_t sizeField{ _byteswap_ulong(static_cast<std::uint32_t>(data.size())) };
+	const std::uint32_t sizeField{ _byteswap_ulong(static_cast<std::uint32_t>(data.size())) }; // TODO C++23: replace _byteswap_ulong with std::byteswap
 	m_outputData.resize(sizeof(sizeField) + data.size());
 	std::memcpy(m_outputData.data(), &sizeField, sizeof(sizeField));
 	std::memcpy(m_outputData.data() + sizeof(sizeField), data.data(), data.size());
