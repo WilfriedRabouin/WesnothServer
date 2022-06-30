@@ -17,8 +17,9 @@ You should have received a copy of the GNU General Public License
 along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <cstdlib>
-#include <string>
+#include <cstdlib> // EXIT_SUCCESS, EXIT_FAILURE
+#include <string> // std::stoull
+#include <exception>
 
 #include <spdlog/spdlog.h>
 

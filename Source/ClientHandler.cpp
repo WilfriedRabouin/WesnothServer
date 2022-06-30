@@ -140,8 +140,6 @@ void ClientHandler::StartLogin()
 
 void ClientHandler::Receive(std::function<void(std::string&&)> completionHandler)
 {
-	spdlog::debug("{}: receiving", GetAddress());
-
 	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, sizeof(SizeField)),
 		[this, self = shared_from_this(), completionHandler](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 	{
@@ -151,11 +149,8 @@ void ClientHandler::Receive(std::function<void(std::string&&)> completionHandler
 		}
 		else
 		{
-			SizeField sizeField{};
-			std::memcpy(&sizeField, m_inputData.data(), sizeof(SizeField));
-
-			const std::size_t dataSize{ _byteswap_ulong(sizeField) };
-			spdlog::debug("{}: Receiving {} bytes", GetAddress(), dataSize);
+			const SizeField sizeField{ *reinterpret_cast<SizeField*>(m_inputData.data()) };
+			const std::size_t dataSize{ _byteswap_ulong(sizeField) }; // TODO C++23: replace _byteswap_ulong with std::byteswap
 
 			boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, dataSize),
 				[this, self, completionHandler](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
@@ -166,7 +161,10 @@ void ClientHandler::Receive(std::function<void(std::string&&)> completionHandler
 					}
 					else
 					{
-						//spdlog::debug("{}: receiving successful:\n{}", GetAddress(), message);
+						const std::string_view data{ reinterpret_cast<char*>(m_inputData.data()), m_inputData.size() };
+						Gzip::Uncompress();
+
+						//spdlog::debug("{}: receiving x bytes\nx", GetAddress());
 						//completionHandler(message);
 					}
 				});
@@ -179,9 +177,9 @@ void ClientHandler::Send(std::string_view message, std::function<void()> complet
 	const std::string data{ Gzip::Compress(message) };
 	const SizeField sizeField{ _byteswap_ulong(static_cast<SizeField>(data.size())) }; // TODO C++23: replace _byteswap_ulong with std::byteswap
 
-	m_outputData.resize(sizeof(SizeField) + data.size());
-	std::memcpy(m_outputData.data(), &sizeField, sizeof(SizeField));
-	std::memcpy(m_outputData.data() + sizeof(SizeField), data.data(), data.size());
+	m_outputData.resize(sizeof(sizeField) + data.size());
+	std::memcpy(m_outputData.data(), &sizeField, sizeof(sizeField));
+	std::memcpy(m_outputData.data() + sizeof(sizeField), data.data(), data.size());
 
 	spdlog::debug("{}: sending {} bytes\n{}", GetAddress(), m_outputData.size(), message);
 
@@ -194,7 +192,6 @@ void ClientHandler::Send(std::string_view message, std::function<void()> complet
 		}
 		else
 		{
-			spdlog::debug("{}: sending successful", GetAddress());
 			completionHandler();
 		}
 	});
