@@ -94,7 +94,7 @@ void ClientHandler::StartHandshake()
 					else
 					{
 						spdlog::debug("{}: handshake successful", GetAddress());
-						// TODO
+						StartLogin();
 					}
 				});
 		}
@@ -120,6 +120,12 @@ ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
 [[nodiscard]] std::string ClientHandler::GetAddress() const
 {
 	return m_socket.remote_endpoint().address().to_string();
+}
+
+void ClientHandler::StartLogin()
+{
+	// TODO
+	Send(versionMessage);
 }
 
 void ClientHandler::Receive()

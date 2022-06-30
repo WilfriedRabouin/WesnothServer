@@ -42,6 +42,8 @@ private:
 
 	[[nodiscard]] std::string GetAddress() const;
 
+	void StartLogin();
+
 	void Receive();
 	void Send(std::string_view message);
 
