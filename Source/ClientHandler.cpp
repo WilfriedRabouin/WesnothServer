@@ -121,6 +121,7 @@ ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
 	++s_instanceCount;
 }
 
+// TODO: avoid copy
 [[nodiscard]] std::string ClientHandler::GetAddress() const
 {
 	return m_socket.remote_endpoint().address().to_string();
@@ -138,7 +139,7 @@ void ClientHandler::StartLogin()
 	//spdlog::info("{}: login successful", GetAddress());
 }
 
-void ClientHandler::Receive(std::function<void(const std::string&)> completionHandler)
+void ClientHandler::Receive(std::function<void(std::string&&)> completionHandler)
 {
 	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_readData, sizeof(SizeField)),
 		[this, self = shared_from_this(), completionHandler](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
@@ -162,9 +163,9 @@ void ClientHandler::Receive(std::function<void(const std::string&)> completionHa
 					else
 					{
 						const std::string_view data{ reinterpret_cast<char*>(m_readData.data()), m_readData.size() };
-						const std::string message{ Gzip::Uncompress(data) };
+						std::string message{ Gzip::Uncompress(data) };
 						spdlog::debug("{}: receiving {} bytes\n{}", GetAddress(), m_readData.size() + sizeof(SizeField), message);
-						completionHandler(message);
+						completionHandler(std::move(message));
 					}
 				});
 		}
