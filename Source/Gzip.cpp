@@ -24,9 +24,9 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/copy.hpp>
 
-#include "Utility.hpp"
+#include "Gzip.hpp"
 
-namespace Utility
+namespace Gzip
 {
 	[[nodiscard]] std::string Compress(std::string_view data)
 	{

@@ -11,8 +11,8 @@ add_executable (${PROJECT_NAME}
 	Source/Server.cpp
 	Source/ClientHandler.hpp
 	Source/ClientHandler.cpp
-	Source/Utility.hpp
-	Source/Utility.cpp
+	Source/Gzip.hpp
+	Source/Gzip.cpp
 )
 
 set_target_properties (${PROJECT_NAME} PROPERTIES

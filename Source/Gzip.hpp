@@ -22,7 +22,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <string>
 #include <string_view>
 
-namespace Utility
+namespace Gzip
 {
 	[[nodiscard]] std::string Compress(std::string_view data);
 	[[nodiscard]] std::string Uncompress(std::string_view data);
