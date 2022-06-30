@@ -19,9 +19,9 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <stdlib.h> // _byteswap_ulong
 #include <array>
-#include <utility>
-#include <algorithm>
-#include <cstring> // memcpy
+#include <utility> // std::move
+#include <algorithm> // std::ranges::equal
+#include <cstring> // std::memcpy
 
 #include <spdlog/spdlog.h>
 
