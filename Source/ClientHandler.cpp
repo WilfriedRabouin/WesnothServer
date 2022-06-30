@@ -130,16 +130,18 @@ void ClientHandler::StartLogin()
 	Send(versionMessage,
 		[this]
 		{
-			Receive([] {});
+			//Receive([](const std::string&) {});
 		});
 
 	//spdlog::info("{}: login successful", GetAddress());
 }
 
-void ClientHandler::Receive(std::function<void()> /*completionHandler*/)
+void ClientHandler::Receive(std::function<void(const std::string&)> completionHandler)
 {
-	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, 4),
-		[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+	spdlog::debug("{}: receiving", GetAddress());
+
+	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, sizeof(std::uint32_t)),
+		[this, self = shared_from_this(), completionHandler](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 	{
 		if (error)
 		{
@@ -147,12 +149,14 @@ void ClientHandler::Receive(std::function<void()> /*completionHandler*/)
 		}
 		else
 		{
-			const std::size_t size{ static_cast<std::size_t>((m_inputData[0] << 24) | (m_inputData[1] << 16) | (m_inputData[2] << 8) | (m_inputData[3] << 0)) };
+			std::uint32_t sizeField{};
+			std::memcpy(&sizeField, m_inputData.data(), sizeof(sizeField));
 
-			spdlog::debug("Received {} bytes", size);
+			const std::size_t dataSize{ _byteswap_ulong(sizeField) };
+			spdlog::debug("{}: Receiving {} bytes", GetAddress(), dataSize);
 
-			boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, size),
-				[this, self](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+			boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, dataSize),
+				[this, self, completionHandler](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 				{
 					if (error)
 					{
@@ -160,7 +164,8 @@ void ClientHandler::Receive(std::function<void()> /*completionHandler*/)
 					}
 					else
 					{
-						// TODO
+						//spdlog::debug("{}: receiving successful:\n{}", GetAddress(), message);
+						//completionHandler(message);
 					}
 				});
 
@@ -172,11 +177,12 @@ void ClientHandler::Send(std::string_view message, std::function<void()> complet
 {
 	const std::string data{ Gzip::Compress(message) };
 	const std::uint32_t sizeField{ _byteswap_ulong(static_cast<std::uint32_t>(data.size())) }; // TODO C++23: replace _byteswap_ulong with std::byteswap
+
 	m_outputData.resize(sizeof(sizeField) + data.size());
 	std::memcpy(m_outputData.data(), &sizeField, sizeof(sizeField));
 	std::memcpy(m_outputData.data() + sizeof(sizeField), data.data(), data.size());
 
-	spdlog::debug("{}: sending {} bytes:\n{}", GetAddress(), m_outputData.size(), message);
+	spdlog::debug("{}: sending {} bytes\n{}", GetAddress(), m_outputData.size(), message);
 
 	boost::asio::async_write(m_socket, boost::asio::buffer(m_outputData),
 		[this, self = shared_from_this(), completionHandler](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
