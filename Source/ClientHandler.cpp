@@ -17,9 +17,11 @@ You should have received a copy of the GNU General Public License
 along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <stdlib.h> // _byteswap_ulong
 #include <array>
 #include <utility>
 #include <algorithm>
+#include <cstring> // memcpy
 
 #include <spdlog/spdlog.h>
 
@@ -93,7 +95,7 @@ void ClientHandler::StartHandshake()
 					}
 					else
 					{
-						spdlog::debug("{}: handshake successful", GetAddress());
+						spdlog::info("{}: handshake successful", GetAddress());
 						StartLogin();
 					}
 				});
@@ -122,10 +124,11 @@ ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
 	return m_socket.remote_endpoint().address().to_string();
 }
 
+// WIP
 void ClientHandler::StartLogin()
 {
-	// TODO
 	Send(versionMessage);
+	//spdlog::info("{}: login successful", GetAddress());
 }
 
 void ClientHandler::Receive()
@@ -153,7 +156,6 @@ void ClientHandler::Receive()
 					else
 					{
 						// TODO
-						Receive();
 					}
 				});
 
@@ -163,14 +165,13 @@ void ClientHandler::Receive()
 
 void ClientHandler::Send(std::string_view message)
 {
-	const std::string data = Gzip::Compress(message);
+	spdlog::debug("{}: sending:\n{}", GetAddress(), message);
 
-	m_outputData.resize(data.size() + 4);
-	m_outputData[0] = (data.size() >> 24) & 0xFF;
-	m_outputData[1] = (data.size() >> 16) & 0xFF;
-	m_outputData[2] = (data.size() >> 8) & 0xFF;
-	m_outputData[3] = (data.size() >> 0) & 0xFF;
-	std::ranges::copy_n(data.data(), data.size(), m_outputData.data() + 4);
+	const std::string data{ Gzip::Compress(message) };
+	const std::uint32_t sizeField{ _byteswap_ulong(static_cast<std::uint32_t>(data.size())) };
+	m_outputData.resize(sizeof(sizeField) + data.size());
+	std::memcpy(m_outputData.data(), &sizeField, sizeof(sizeField));
+	std::memcpy(m_outputData.data() + sizeof(sizeField), data.data(), data.size());
 
 	boost::asio::async_write(m_socket, boost::asio::buffer(m_outputData),
 		[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
