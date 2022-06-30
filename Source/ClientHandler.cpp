@@ -127,7 +127,12 @@ ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
 // WIP
 void ClientHandler::StartLogin()
 {
-	Send(versionMessage, [] {});
+	Send(versionMessage,
+		[this]
+		{
+			Receive([] {});
+		});
+
 	//spdlog::info("{}: login successful", GetAddress());
 }
 
@@ -163,18 +168,18 @@ void ClientHandler::Receive(std::function<void()> /*completionHandler*/)
 	});
 }
 
-void ClientHandler::Send(std::string_view message, std::function<void()> /*completionHandler*/)
+void ClientHandler::Send(std::string_view message, std::function<void()> completionHandler)
 {
-	spdlog::debug("{}: sending:\n{}", GetAddress(), message);
-
 	const std::string data{ Gzip::Compress(message) };
 	const std::uint32_t sizeField{ _byteswap_ulong(static_cast<std::uint32_t>(data.size())) }; // TODO C++23: replace _byteswap_ulong with std::byteswap
 	m_outputData.resize(sizeof(sizeField) + data.size());
 	std::memcpy(m_outputData.data(), &sizeField, sizeof(sizeField));
 	std::memcpy(m_outputData.data() + sizeof(sizeField), data.data(), data.size());
 
+	spdlog::debug("{}: sending {} bytes:\n{}", GetAddress(), m_outputData.size(), message);
+
 	boost::asio::async_write(m_socket, boost::asio::buffer(m_outputData),
-		[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+		[this, self = shared_from_this(), completionHandler](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 	{
 		if (error)
 		{
@@ -183,6 +188,7 @@ void ClientHandler::Send(std::string_view message, std::function<void()> /*compl
 		else
 		{
 			spdlog::debug("{}: sending successful", GetAddress());
+			completionHandler();
 		}
 	});
 }
