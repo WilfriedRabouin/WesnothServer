@@ -22,9 +22,31 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 
 #include <spdlog/spdlog.h>
-#include <zlib.h>
 
 #include "ClientHandler.hpp"
+#include "Gzip.hpp"
+
+constexpr std::string_view versionMessage{
+	"[version]\n"
+	"[/version]"
+};
+
+constexpr std::string_view mustloginMessage{
+	"[mustlogin]\n"
+	"[/mustlogin]"
+};
+
+constexpr std::string_view joinLobbyMessage{
+	"[join_lobby]\n"
+	"is_moderator=\"no\"\n"
+	"profile_url_prefix=\"\"\n"
+	"[/join_lobby]"
+};
+
+constexpr std::string_view gamelistMessage{
+	"[gamelist]\n"
+	"[/gamelist]"
+};
 
 std::size_t ClientHandler::s_instanceCount{};
 
@@ -72,8 +94,7 @@ void ClientHandler::StartHandshake()
 					else
 					{
 						spdlog::debug("{}: handshake successful", GetAddress());
-						SendGamelistMessage();
-						Receive();
+						// TODO
 					}
 				});
 		}
@@ -112,7 +133,10 @@ void ClientHandler::Receive()
 		}
 		else
 		{
-			const std::size_t size{ static_cast<std::size_t>((m_inputData[0] << 24) | (m_inputData[0] << 16) | (m_inputData[0] << 8) | (m_inputData[0] << 0)) };
+			const std::size_t size{ static_cast<std::size_t>((m_inputData[0] << 24) | (m_inputData[1] << 16) | (m_inputData[2] << 8) | (m_inputData[3] << 0)) };
+
+			spdlog::debug("Received {} bytes", size);
+
 			boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_inputData, size),
 				[this, self](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 				{
@@ -122,81 +146,36 @@ void ClientHandler::Receive()
 					}
 					else
 					{
-						const Bytef* source{ m_inputData.data() };
-						const uLong sourceLen{ static_cast<uLong>(m_inputData.size()) };
-
-						uLongf destLen{ sourceLen * 4 };
-						std::vector<std::uint8_t> data(destLen, 0);
-						Bytef* dest{ data.data() };
-
-						const int result = uncompress(dest, &destLen, source, sourceLen);
-						if (result == Z_OK)
-						{
-							spdlog::debug("{}: receiving successful", GetAddress());
-						}
-						else
-						{
-							spdlog::error("{}: receiving failed (uncompression failed)", GetAddress());
-						}
+						// TODO
+						Receive();
 					}
 				});
+
 		}
 	});
 }
 
 void ClientHandler::Send(std::string_view message)
 {
-	const Bytef* source{ reinterpret_cast<const Bytef*>(message.data()) };
-	const uLong sourceLen{ static_cast<uLong>(message.size()) };
-	uLongf destLen{ compressBound(sourceLen) };
+	const std::string data = Gzip::Compress(message);
 
-	constexpr std::size_t sizeFieldLength{ 4 };
-	m_outputData.resize(destLen + sizeFieldLength);
-	Bytef* dest{ m_outputData.data() + sizeFieldLength };
+	m_outputData.resize(data.size() + 4);
+	m_outputData[0] = (data.size() >> 24) & 0xFF;
+	m_outputData[1] = (data.size() >> 16) & 0xFF;
+	m_outputData[2] = (data.size() >> 8) & 0xFF;
+	m_outputData[3] = (data.size() >> 0) & 0xFF;
+	std::ranges::copy_n(data.data(), data.size(), m_outputData.data() + 4);
 
-	const int result = compress(dest, &destLen, source, sourceLen);
-	if (result == Z_OK)
+	boost::asio::async_write(m_socket, boost::asio::buffer(m_outputData),
+		[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 	{
-		m_outputData[0] = (destLen >> 24) & 0xFF;
-		m_outputData[1] = (destLen >> 16) & 0xFF;
-		m_outputData[2] = (destLen >> 8) & 0xFF;
-		m_outputData[3] = (destLen >> 0) & 0xFF;
-
-		boost::asio::async_write(m_socket, boost::asio::dynamic_buffer(m_outputData, destLen),
-			[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+		if (error)
 		{
-			if (error)
-			{
-				spdlog::error("{}: sending failed ({})", GetAddress(), error.message());
-			}
-			else
-			{
-				spdlog::debug("{}: sending successful", GetAddress());
-			}
-		});
-	}
-	else
-	{
-		spdlog::error("{}: sending failed (compression failed)", GetAddress());
-	}
-}
-
-void ClientHandler::SendJoinLobbyMessage()
-{
-	constexpr std::string_view message{
-		"[join_lobby]\n" \
-		"    is_moderator=no\n" \
-		"    profile_url_prefix=\"\"\n" \
-		"[/join_lobby]" };
-
-	Send(message);
-}
-
-void ClientHandler::SendGamelistMessage()
-{
-	constexpr std::string_view message{
-		"[gamelist]\n" \
-		"[/gamelist]" };
-
-	Send(message);
+			spdlog::error("{}: sending failed ({})", GetAddress(), error.message());
+		}
+		else
+		{
+			spdlog::debug("{}: sending successful", GetAddress());
+		}
+	});
 }
