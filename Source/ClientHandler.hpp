@@ -24,7 +24,6 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <memory> // std::enable_shared_from_this, std::shared_ptr
 #include <string>
 #include <string_view>
-#include <functional> // std::function
 
 #include <boost/asio.hpp>
 
