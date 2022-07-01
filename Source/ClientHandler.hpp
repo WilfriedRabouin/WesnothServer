@@ -41,8 +41,6 @@ public:
 private:
 	explicit ClientHandler(boost::asio::ip::tcp::socket socket);
 
-	[[nodiscard]] const std::string& GetAddress() const;
-
 	void StartLogin();
 
 	void Receive(std::function<void(std::string&&)> completionHandler);
