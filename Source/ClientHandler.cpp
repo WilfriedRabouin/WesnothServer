@@ -127,13 +127,13 @@ void ClientHandler::StartLogin()
 	Send(versionMessage,
 		[this]
 		{
-			Receive([](std::string&&) {});
+			Receive([](std::string) {});
 		});
 
 	//spdlog::info("{}: login successful", m_address);
 }
 
-void ClientHandler::Receive(std::function<void(std::string&&)> completionHandler)
+void ClientHandler::Receive(std::function<void(std::string)> completionHandler)
 {
 	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_readData, sizeof(SizeField)),
 		[this, self = shared_from_this(), completionHandler = std::move(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
@@ -149,19 +149,19 @@ void ClientHandler::Receive(std::function<void(std::string&&)> completionHandler
 
 			boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_readData, dataSize),
 				[this, self, completionHandler = std::move(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+			{
+				if (error)
 				{
-					if (error)
-					{
-						spdlog::error("{}: receiving failed ({})", m_address, error.message());
-					}
-					else
-					{
-						const std::string_view data{ reinterpret_cast<char*>(m_readData.data()), m_readData.size() };
-						std::string message{ Gzip::Uncompress(data) };
-						spdlog::debug("{}: receiving {} bytes\n{}", m_address, m_readData.size() + sizeof(SizeField), message);
-						completionHandler(std::move(message));
-					}
-				});
+					spdlog::error("{}: receiving failed ({})", m_address, error.message());
+				}
+				else
+				{
+					const std::string_view data{ reinterpret_cast<char*>(m_readData.data()), m_readData.size() };
+					std::string message{ Gzip::Uncompress(data) };
+					spdlog::debug("{}: receiving {} bytes\n{}", m_address, m_readData.size() + sizeof(SizeField), message);
+					completionHandler(std::move(message));
+				}
+			});
 		}
 	});
 }

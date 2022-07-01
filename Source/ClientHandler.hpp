@@ -43,7 +43,7 @@ private:
 
 	void StartLogin();
 
-	void Receive(std::function<void(std::string&&)> completionHandler);
+	void Receive(std::function<void(std::string)> completionHandler);
 	void Send(std::string_view message, std::function<void()> completionHandler);
 
 	static std::size_t s_instanceCount;
