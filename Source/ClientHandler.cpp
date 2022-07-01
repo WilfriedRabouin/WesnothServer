@@ -136,7 +136,7 @@ void ClientHandler::StartLogin()
 void ClientHandler::Receive(std::function<void(std::string&&)> completionHandler)
 {
 	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_readData, sizeof(SizeField)),
-		[this, self = shared_from_this(), completionHandler](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+		[this, self = shared_from_this(), completionHandler = std::move(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 	{
 		if (error)
 		{
@@ -148,7 +148,7 @@ void ClientHandler::Receive(std::function<void(std::string&&)> completionHandler
 			const std::size_t dataSize{ _byteswap_ulong(sizeField) }; // TODO C++23: replace _byteswap_ulong with std::byteswap
 
 			boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_readData, dataSize),
-				[this, self, completionHandler](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+				[this, self, completionHandler = std::move(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 				{
 					if (error)
 					{
@@ -178,7 +178,7 @@ void ClientHandler::Send(std::string_view message, std::function<void()> complet
 	spdlog::debug("{}: sending {} bytes\n{}", m_address, m_writeData.size(), message);
 
 	boost::asio::async_write(m_socket, boost::asio::buffer(m_writeData),
-		[this, self = shared_from_this(), completionHandler](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+		[this, self = shared_from_this(), completionHandler = std::move(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 	{
 		if (error)
 		{
