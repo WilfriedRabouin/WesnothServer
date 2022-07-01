@@ -115,16 +115,15 @@ void ClientHandler::StartHandshake()
 }
 
 ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
-	: m_socket{ std::move(socket) }
+	: m_address{ socket.remote_endpoint().address().to_string() }, m_socket{ std::move(socket) }
 {
 	spdlog::info("{}: connected", GetAddress());
 	++s_instanceCount;
 }
 
-// TODO: avoid copy
-[[nodiscard]] std::string ClientHandler::GetAddress() const
+[[nodiscard]] const std::string& ClientHandler::GetAddress() const
 {
-	return m_socket.remote_endpoint().address().to_string();
+	return m_address;
 }
 
 // WIP
@@ -133,7 +132,7 @@ void ClientHandler::StartLogin()
 	Send(versionMessage,
 		[this]
 		{
-			//Receive([](const std::string&) {});
+			Receive([](std::string&&) {});
 		});
 
 	//spdlog::info("{}: login successful", GetAddress());

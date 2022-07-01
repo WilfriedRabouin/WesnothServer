@@ -41,7 +41,7 @@ public:
 private:
 	explicit ClientHandler(boost::asio::ip::tcp::socket socket);
 
-	[[nodiscard]] std::string GetAddress() const;
+	[[nodiscard]] const std::string& GetAddress() const;
 
 	void StartLogin();
 
@@ -50,6 +50,7 @@ private:
 
 	static std::size_t s_instanceCount;
 
+	const std::string m_address{};
 	boost::asio::ip::tcp::socket m_socket;
 	std::vector<std::uint8_t> m_readData{};
 	std::vector<std::uint8_t> m_writeData{};
