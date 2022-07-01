@@ -136,7 +136,7 @@ void ClientHandler::StartLogin()
 void ClientHandler::Receive(std::function<void(std::string)> completionHandler)
 {
 	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_readData, sizeof(SizeField)),
-		[this, self = shared_from_this(), completionHandler = std::move(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+		[this, self = shared_from_this(), completionHandler = std::move(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/) mutable
 	{
 		if (error)
 		{
