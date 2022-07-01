@@ -73,8 +73,9 @@ ClientHandler::~ClientHandler()
 void ClientHandler::StartHandshake()
 {
 	constexpr std::size_t requestSize{ 4 };
+	m_readData.resize(requestSize);
 
-	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_readData, requestSize),
+	boost::asio::async_read(m_socket, boost::asio::buffer(m_readData),
 		[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 	{
 		constexpr std::array<std::uint8_t, requestSize> normalConnectionRequest{ { 0, 0, 0, 0 } };
@@ -136,7 +137,9 @@ void ClientHandler::StartLogin()
 template <typename CompletionHandler>
 void ClientHandler::Receive(CompletionHandler completionHandler)
 {
-	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_readData, sizeof(SizeField)),
+	m_readData.resize(sizeof(SizeField));
+
+	boost::asio::async_read(m_socket, boost::asio::buffer(m_readData),
 		[this, self = shared_from_this(), completionHandler = std::move(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/) mutable
 	{
 		if (error)
@@ -147,8 +150,9 @@ void ClientHandler::Receive(CompletionHandler completionHandler)
 		{
 			const SizeField sizeField{ *reinterpret_cast<SizeField*>(m_readData.data()) };
 			const std::size_t dataSize{ _byteswap_ulong(sizeField) }; // TODO C++23: replace _byteswap_ulong with std::byteswap
+			m_readData.resize(dataSize);
 
-			boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_readData, dataSize),
+			boost::asio::async_read(m_socket, boost::asio::buffer(m_readData),
 				[this, self, completionHandler = std::move(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 			{
 				if (error)
