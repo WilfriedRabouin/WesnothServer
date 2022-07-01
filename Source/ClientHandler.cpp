@@ -17,11 +17,11 @@ You should have received a copy of the GNU General Public License
 along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <stdlib.h> // _byteswap_ulong
+#include <stdlib.h>
 #include <array>
-#include <utility> // std::move
-#include <algorithm> // std::ranges::equal
-#include <cstring> // std::memcpy
+#include <utility>
+#include <algorithm>
+#include <cstring>
 
 #include <spdlog/spdlog.h>
 

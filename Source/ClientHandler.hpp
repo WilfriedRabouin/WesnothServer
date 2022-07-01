@@ -19,9 +19,9 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <cstdint> // std::uint8_t
+#include <cstdint>
 #include <vector>
-#include <memory> // std::enable_shared_from_this, std::shared_ptr
+#include <memory>
 #include <string>
 #include <string_view>
 

@@ -17,8 +17,8 @@ You should have received a copy of the GNU General Public License
 along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <cstdlib> // EXIT_SUCCESS, EXIT_FAILURE
-#include <string> // std::stoull
+#include <cstdlib>
+#include <string>
 #include <exception>
 
 #include <spdlog/spdlog.h>
@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 {
 #ifdef _DEBUG
 	spdlog::set_level(spdlog::level::debug);
-#endif // _DEBUG
+#endif
 
 	bool isClientCountLimited{ true };
 	std::size_t clientCountLimit{ 1 };

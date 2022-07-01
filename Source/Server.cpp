@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <utility> // std::move
+#include <utility>
 
 #include <boost/asio.hpp>
 #include <spdlog/spdlog.h>
