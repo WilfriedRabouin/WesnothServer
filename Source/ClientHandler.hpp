@@ -43,8 +43,11 @@ private:
 
 	void StartLogin();
 
-	void Receive(std::function<void(std::string)> completionHandler);
-	void Send(std::string_view message, std::function<void()> completionHandler);
+	template <typename CompletionHandler>
+	void Receive(CompletionHandler completionHandler);
+
+	template <typename CompletionHandler>
+	void Send(std::string_view message, CompletionHandler completionHandler);
 
 	static std::size_t s_instanceCount;
 

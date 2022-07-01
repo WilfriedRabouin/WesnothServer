@@ -133,7 +133,8 @@ void ClientHandler::StartLogin()
 	//spdlog::info("{}: login successful", m_address);
 }
 
-void ClientHandler::Receive(std::function<void(std::string)> completionHandler)
+template <typename CompletionHandler>
+void ClientHandler::Receive(CompletionHandler completionHandler)
 {
 	boost::asio::async_read(m_socket, boost::asio::dynamic_buffer(m_readData, sizeof(SizeField)),
 		[this, self = shared_from_this(), completionHandler = std::move(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/) mutable
@@ -166,7 +167,8 @@ void ClientHandler::Receive(std::function<void(std::string)> completionHandler)
 	});
 }
 
-void ClientHandler::Send(std::string_view message, std::function<void()> completionHandler)
+template <typename CompletionHandler>
+void ClientHandler::Send(std::string_view message, CompletionHandler completionHandler)
 {
 	const std::string data{ Gzip::Compress(message) };
 	const SizeField sizeField{ _byteswap_ulong(static_cast<SizeField>(data.size())) }; // TODO C++23: replace _byteswap_ulong with std::byteswap
