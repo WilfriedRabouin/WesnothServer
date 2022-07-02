@@ -20,10 +20,12 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <cstdlib>
 #include <string>
 #include <exception>
+#include <iostream>
 
 #include <spdlog/spdlog.h>
 
 #include "Server.hpp"
+#include "Versions.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -45,6 +47,10 @@ int main(int argc, char* argv[])
 			clientCountLimit = std::stoull(argv[2]);
 		}
 	}
+
+	std::cout
+		<< "Wesnoth Server - version " << g_serverVersion << "\n"
+		<< "Compatible with client version " << g_clientVersion << "\n\n";
 
 	try
 	{

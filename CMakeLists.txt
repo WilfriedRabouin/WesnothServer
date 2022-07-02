@@ -13,6 +13,7 @@ add_executable (${PROJECT_NAME}
 	Source/ClientHandler.cpp
 	Source/Gzip.hpp
 	Source/Gzip.cpp
+	Source/Versions.hpp
 )
 
 set_target_properties (${PROJECT_NAME} PROPERTIES
