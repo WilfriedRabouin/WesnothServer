@@ -22,7 +22,6 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <utility>
 #include <algorithm>
 #include <cstring>
-#include <ios>
 
 #include <spdlog/spdlog.h>
 
@@ -164,15 +163,17 @@ void ClientHandler::Receive(CompletionHandler completionHandler)
 				{
 					const std::string_view data{ reinterpret_cast<char*>(m_readData.data()), m_readData.size() };
 
-					try
+					bool gzipError{};
+					std::string message{ Gzip::Uncompress(data, gzipError) };
+
+					if (gzipError)
 					{
-						std::string message{ Gzip::Uncompress(data) };
+						spdlog::error("{}: receiving failed", m_address);
+					}
+					else
+					{
 						spdlog::debug("{}: receiving {} bytes\n{}", m_address, m_readData.size() + sizeof(SizeField), message);
 						completionHandler(std::move(message));
-					}
-					catch (const std::ios_base::failure& failure)
-					{
-						spdlog::error("{}: receiving failed (decompression error: \"{}\")", m_address, failure.what());
 					}
 				}
 			});
@@ -183,33 +184,34 @@ void ClientHandler::Receive(CompletionHandler completionHandler)
 template <typename CompletionHandler>
 void ClientHandler::Send(std::string_view message, CompletionHandler completionHandler)
 {
-	try
+	bool gzipError{};
+	const std::string data{ Gzip::Compress(message, gzipError) };
+
+	if (gzipError)
 	{
-		const std::string data{ Gzip::Compress(message) };
+		spdlog::error("{}: sending failed", m_address);
+	}
+	else
+	{
 		const SizeField sizeField{ _byteswap_ulong(static_cast<SizeField>(data.size())) }; // TODO C++23: replace _byteswap_ulong with std::byteswap
 
 		m_writeData.resize(sizeof(sizeField) + data.size());
 		std::memcpy(m_writeData.data(), &sizeField, sizeof(sizeField));
 		std::memcpy(m_writeData.data() + sizeof(sizeField), data.data(), data.size());
-	}
-	catch (const std::ios_base::failure& failure)
-	{
-		spdlog::error("{}: sending failed (compression error: \"{}\")", m_address, failure.what());
-		return;
-	}
 
-	spdlog::debug("{}: sending {} bytes\n{}", m_address, m_writeData.size(), message);
+		spdlog::debug("{}: sending {} bytes\n{}", m_address, m_writeData.size(), message);
 
-	boost::asio::async_write(m_socket, boost::asio::buffer(m_writeData),
-		[this, self = shared_from_this(), completionHandler = std::move(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
-	{
-		if (error)
+		boost::asio::async_write(m_socket, boost::asio::buffer(m_writeData),
+			[this, self = shared_from_this(), completionHandler = std::move(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 		{
-			spdlog::error("{}: sending failed ({})", m_address, error.message());
-		}
-		else
-		{
-			completionHandler();
-		}
-	});
+			if (error)
+			{
+				spdlog::error("{}: sending failed ({})", m_address, error.message());
+			}
+			else
+			{
+				completionHandler();
+			}
+		});
+	}
 }
