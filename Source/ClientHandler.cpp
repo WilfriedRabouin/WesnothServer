@@ -128,10 +128,38 @@ void ClientHandler::StartLogin()
 	Send(versionMessage,
 		[this]
 		{
-			Receive([](std::string) {});
-		});
+			Receive(
+				[this](std::string&& /*message*/)
+				{
+					// TODO: check client version
 
-	//spdlog::info("{}: login successful", m_address);
+					Send(mustloginMessage,
+						[this]
+						{
+							Receive(
+								[this](std::string&& /*message*/)
+								{
+									// TODO: display username
+
+									Send(joinLobbyMessage,
+										[this]
+										{
+											Send(gamelistMessage,
+												[this]
+												{
+													spdlog::info("{}: login successful", m_address);
+
+													Receive(
+														[this](std::string&& /*message*/)
+														{
+															// nothing
+														});
+												});
+										});
+								});
+						});
+				});
+		});
 }
 
 template <typename CompletionHandler>
@@ -194,7 +222,6 @@ void ClientHandler::Send(std::string_view message, CompletionHandler completionH
 	else
 	{
 		const SizeField sizeField{ _byteswap_ulong(static_cast<SizeField>(data.size())) }; // TODO C++23: replace _byteswap_ulong with std::byteswap
-
 		m_writeData.resize(sizeof(sizeField) + data.size());
 		std::memcpy(m_writeData.data(), &sizeField, sizeof(sizeField));
 		std::memcpy(m_writeData.data() + sizeof(sizeField), data.data(), data.size());
