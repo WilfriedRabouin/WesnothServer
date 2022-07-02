@@ -19,34 +19,61 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <sstream>
 #include <utility>
+#include <ios>
 
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/copy.hpp>
 
+#include <spdlog/spdlog.h>
+
 #include "Gzip.hpp"
 
 namespace Gzip
 {
-	[[nodiscard]] std::string Compress(std::string_view data)
+	[[nodiscard]] std::string Compress(std::string_view data, bool& error)
 	{
 		boost::iostreams::filtering_istreambuf buffer{};
 		buffer.push(boost::iostreams::gzip_compressor{});
 		buffer.push(boost::iostreams::array_source{ data.data(), data.size() });
 
 		std::stringstream stringStream{};
-		boost::iostreams::copy(buffer, stringStream);
+
+		try
+		{
+			boost::iostreams::copy(buffer, stringStream);
+		}
+		catch (const std::ios_base::failure& failure)
+		{
+			spdlog::error("Compression failed ({})", failure.what());
+			error = true;
+			return {};
+		}
+
+		error = false;
 		return std::move(stringStream).str();
 	}
 
-	[[nodiscard]] std::string Uncompress(std::string_view data)
+	[[nodiscard]] std::string Uncompress(std::string_view data, bool& error)
 	{
 		boost::iostreams::filtering_istreambuf buffer{};
 		buffer.push(boost::iostreams::gzip_decompressor{});
 		buffer.push(boost::iostreams::array_source{ data.data(), data.size() });
 
 		std::stringstream stringStream{};
-		boost::iostreams::copy(buffer, stringStream);
+
+		try
+		{
+			boost::iostreams::copy(buffer, stringStream);
+		}
+		catch (const std::ios_base::failure& failure)
+		{
+			spdlog::error("Decompression failed ({})", failure.what());
+			error = true;
+			return {};
+		}
+		
+		error = false;
 		return std::move(stringStream).str();
 	}
 }
