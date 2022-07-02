@@ -162,7 +162,7 @@ void ClientHandler::Receive(CompletionHandler completionHandler)
 				}
 				else
 				{
-					const std::string_view data{ /*reinterpret_cast<char*>(m_readData.data()), m_readData.size()*/ };
+					const std::string_view data{ reinterpret_cast<char*>(m_readData.data()), m_readData.size() };
 
 					try
 					{
@@ -172,7 +172,7 @@ void ClientHandler::Receive(CompletionHandler completionHandler)
 					}
 					catch (const std::ios_base::failure& failure)
 					{
-						spdlog::error("{}: sending failed (decompression error: \"{}\")", m_address, failure.what());
+						spdlog::error("{}: receiving failed (decompression error: \"{}\")", m_address, failure.what());
 					}
 				}
 			});
