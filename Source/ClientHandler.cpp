@@ -22,6 +22,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <utility>
 #include <algorithm>
 #include <cstring>
+#include <ios>
 
 #include <spdlog/spdlog.h>
 
@@ -161,10 +162,18 @@ void ClientHandler::Receive(CompletionHandler completionHandler)
 				}
 				else
 				{
-					const std::string_view data{ reinterpret_cast<char*>(m_readData.data()), m_readData.size() };
-					std::string message{ Gzip::Uncompress(data) };
-					spdlog::debug("{}: receiving {} bytes\n{}", m_address, m_readData.size() + sizeof(SizeField), message);
-					completionHandler(std::move(message));
+					const std::string_view data{ /*reinterpret_cast<char*>(m_readData.data()), m_readData.size()*/ };
+
+					try
+					{
+						std::string message{ Gzip::Uncompress(data) };
+						spdlog::debug("{}: receiving {} bytes\n{}", m_address, m_readData.size() + sizeof(SizeField), message);
+						completionHandler(std::move(message));
+					}
+					catch (const std::ios_base::failure& failure)
+					{
+						spdlog::error("{}: sending failed (decompression error: \"{}\")", m_address, failure.what());
+					}
 				}
 			});
 		}
@@ -174,12 +183,20 @@ void ClientHandler::Receive(CompletionHandler completionHandler)
 template <typename CompletionHandler>
 void ClientHandler::Send(std::string_view message, CompletionHandler completionHandler)
 {
-	const std::string data{ Gzip::Compress(message) };
-	const SizeField sizeField{ _byteswap_ulong(static_cast<SizeField>(data.size())) }; // TODO C++23: replace _byteswap_ulong with std::byteswap
+	try
+	{
+		const std::string data{ Gzip::Compress(message) };
+		const SizeField sizeField{ _byteswap_ulong(static_cast<SizeField>(data.size())) }; // TODO C++23: replace _byteswap_ulong with std::byteswap
 
-	m_writeData.resize(sizeof(sizeField) + data.size());
-	std::memcpy(m_writeData.data(), &sizeField, sizeof(sizeField));
-	std::memcpy(m_writeData.data() + sizeof(sizeField), data.data(), data.size());
+		m_writeData.resize(sizeof(sizeField) + data.size());
+		std::memcpy(m_writeData.data(), &sizeField, sizeof(sizeField));
+		std::memcpy(m_writeData.data() + sizeof(sizeField), data.data(), data.size());
+	}
+	catch (const std::ios_base::failure& failure)
+	{
+		spdlog::error("{}: sending failed (compression error: \"{}\")", m_address, failure.what());
+		return;
+	}
 
 	spdlog::debug("{}: sending {} bytes\n{}", m_address, m_writeData.size(), message);
 

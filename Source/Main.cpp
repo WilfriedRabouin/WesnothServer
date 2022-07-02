@@ -57,9 +57,9 @@ int main(int argc, char* argv[])
 		RunServer(isClientCountLimited, clientCountLimit);
 		return EXIT_SUCCESS;
 	}
-	catch (const std::exception& e)
+	catch (const std::exception& exception)
 	{
-		spdlog::critical("{}", e.what());
+		spdlog::critical("{}", exception.what());
 		return EXIT_FAILURE;
 	}
 }
