@@ -176,7 +176,13 @@ void ClientHandler::Receive(CompletionHandler completionHandler)
 		}
 		else
 		{
-			const SizeField sizeField{ *reinterpret_cast<SizeField*>(m_readData.data()) };
+			const SizeField sizeField = [this]
+			{
+				SizeField sizeField{};
+				std::memcpy(&sizeField, m_readData.data(), sizeof(sizeField));
+				return sizeField;
+			}();
+
 			const std::size_t dataSize{ std::byteswap(sizeField) };
 			m_readData.resize(dataSize);
 
