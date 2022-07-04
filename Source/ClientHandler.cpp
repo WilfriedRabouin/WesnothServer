@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <stdlib.h>
+#include <bit>
 #include <array>
 #include <utility>
 #include <algorithm>
@@ -177,7 +177,7 @@ void ClientHandler::Receive(CompletionHandler completionHandler)
 		else
 		{
 			const SizeField sizeField{ *reinterpret_cast<SizeField*>(m_readData.data()) };
-			const std::size_t dataSize{ _byteswap_ulong(sizeField) }; // TODO C++23: replace _byteswap_ulong with std::byteswap
+			const std::size_t dataSize{ std::byteswap(sizeField) };
 			m_readData.resize(dataSize);
 
 			boost::asio::async_read(m_socket, boost::asio::buffer(m_readData),
@@ -221,7 +221,7 @@ void ClientHandler::Send(std::string_view message, CompletionHandler completionH
 	}
 	else
 	{
-		const SizeField sizeField{ _byteswap_ulong(static_cast<SizeField>(data.size())) }; // TODO C++23: replace _byteswap_ulong with std::byteswap
+		const SizeField sizeField{ std::byteswap(static_cast<SizeField>(data.size())) };
 		m_writeData.resize(sizeof(sizeField) + data.size());
 		std::memcpy(m_writeData.data(), &sizeField, sizeof(sizeField));
 		std::memcpy(m_writeData.data() + sizeof(sizeField), data.data(), data.size());
