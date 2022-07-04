@@ -179,7 +179,7 @@ void ClientHandler::Receive(CompletionHandler completionHandler)
 			const SizeField sizeField = [this]
 			{
 				SizeField sizeField{};
-				std::memcpy(&sizeField, m_readData.data(), sizeof(sizeField));
+				std::memcpy(&sizeField, m_readData.data(), sizeof(SizeField));
 				return sizeField;
 			}();
 
@@ -228,9 +228,9 @@ void ClientHandler::Send(std::string_view message, CompletionHandler completionH
 	else
 	{
 		const SizeField sizeField{ std::byteswap(static_cast<SizeField>(data.size())) };
-		m_writeData.resize(sizeof(sizeField) + data.size());
-		std::memcpy(m_writeData.data(), &sizeField, sizeof(sizeField));
-		std::memcpy(m_writeData.data() + sizeof(sizeField), data.data(), data.size());
+		m_writeData.resize(sizeof(SizeField) + data.size());
+		std::memcpy(m_writeData.data(), &sizeField, sizeof(SizeField));
+		std::memcpy(m_writeData.data() + sizeof(SizeField), data.data(), data.size());
 
 		spdlog::debug("{}: sending {} bytes\n{}", m_address, m_writeData.size(), message);
 
