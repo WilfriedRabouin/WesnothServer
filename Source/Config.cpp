@@ -39,6 +39,8 @@ Config Config::s_instance{};
 			s_instance.clientCountLimit = std::stoull(argv[2]);
 		}
 	}
+
+	return false;
 }
 
 [[nodiscard]] const Config& Config::GetInstance()
