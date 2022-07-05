@@ -18,7 +18,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <cstdlib>
-#include <string>
+#include <string_view>
 #include <exception>
 #include <iostream>
 
@@ -26,6 +26,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "Server.hpp"
 #include "Versions.hpp"
+#include "Config.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -33,19 +34,9 @@ int main(int argc, char* argv[])
 	spdlog::set_level(spdlog::level::debug);
 #endif
 
-	bool isClientCountLimited{ true };
-	std::size_t clientCountLimit{ 1 };
-
-	if (argc == 3 && argv[1] == std::string{ "--client-limit" })
+	if (Config::Init(argc, argv))
 	{
-		if (argv[2] == std::string{ "none" })
-		{
-			isClientCountLimited = false;
-		}
-		else
-		{
-			clientCountLimit = std::stoull(argv[2]);
-		}
+		return EXIT_FAILURE;
 	}
 
 	std::cout
@@ -54,7 +45,8 @@ int main(int argc, char* argv[])
 
 	try
 	{
-		RunServer(isClientCountLimited, clientCountLimit);
+		const Config& config{ Config::GetInstance() };
+		RunServer(config.isClientCountLimited, config.clientCountLimit);
 		return EXIT_SUCCESS;
 	}
 	catch (const std::exception& exception)
