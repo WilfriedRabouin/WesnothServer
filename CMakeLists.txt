@@ -14,6 +14,8 @@ add_executable (${PROJECT_NAME}
 	Source/Gzip.hpp
 	Source/Gzip.cpp
 	Source/Versions.hpp
+	Source/Config.hpp
+	Source/Config.cpp
 )
 
 set_target_properties (${PROJECT_NAME} PROPERTIES
@@ -25,6 +27,7 @@ set_target_properties (${PROJECT_NAME} PROPERTIES
 target_include_directories (${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries (${PROJECT_NAME} PRIVATE Boost::iostreams spdlog::spdlog)
 
+# TODO: use COMPILE_WARNING_AS_ERROR instead of /WX flag once CMake 3.24 is available
 if (MSVC)
 	target_compile_options (${PROJECT_NAME} PRIVATE /W4 /WX)
 endif ()
