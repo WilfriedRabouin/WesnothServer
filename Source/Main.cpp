@@ -44,8 +44,7 @@ int main(int argc, char* argv[])
 
 	try
 	{
-		const Config& config{ Config::GetInstance() };
-		RunServer(config.isClientCountLimited, config.clientCountLimit);
+		RunServer();
 		return EXIT_SUCCESS;
 	}
 	catch (const std::exception& exception)

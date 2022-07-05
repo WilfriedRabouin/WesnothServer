@@ -19,4 +19,4 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
-void RunServer(bool isClientCountLimited, std::size_t clientCountLimit);
+void RunServer();

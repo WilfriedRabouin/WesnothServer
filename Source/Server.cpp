@@ -24,17 +24,20 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "Server.hpp"
 #include "ClientHandler.hpp"
+#include "Config.hpp"
 
-void Accept(boost::asio::ip::tcp::acceptor& acceptor, bool isClientCountLimited, std::size_t clientCountLimit)
+void Accept(boost::asio::ip::tcp::acceptor& acceptor)
 {
 	acceptor.async_accept(
-		[&acceptor, isClientCountLimited, clientCountLimit](const boost::system::error_code& error, boost::asio::ip::tcp::socket socket)
+		[&acceptor](const boost::system::error_code& error, boost::asio::ip::tcp::socket socket)
 		{
+			const Config& config{ Config::GetInstance() };
+
 			if (error)
 			{
 				spdlog::error("Failed to accept new connection: {}", error.message());
 			}
-			else if (isClientCountLimited && ClientHandler::GetInstanceCount() == clientCountLimit)
+			else if (config.isClientCountLimited && ClientHandler::GetInstanceCount() == config.clientCountLimit)
 			{
 				spdlog::warn("{}: connection refused (client count limit reached)", socket.remote_endpoint().address().to_string());
 			}
@@ -42,16 +45,17 @@ void Accept(boost::asio::ip::tcp::acceptor& acceptor, bool isClientCountLimited,
 			{
 				ClientHandler::create(std::move(socket))->StartHandshake();
 			}
-			Accept(acceptor, isClientCountLimited, clientCountLimit);
+
+			Accept(acceptor);
 		});
 }
 
-void RunServer(bool isClientCountLimited, std::size_t clientCountLimit)
+void RunServer()
 {
 	constexpr boost::asio::ip::port_type port{ 15000 };
 	const boost::asio::ip::tcp::endpoint endpoint{ boost::asio::ip::tcp::v4(), port };
 	boost::asio::io_context ioContext{};
 	boost::asio::ip::tcp::acceptor acceptor{ ioContext, endpoint };
-	Accept(acceptor, isClientCountLimited, clientCountLimit);
+	Accept(acceptor);
 	ioContext.run();
 }
