@@ -18,7 +18,6 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <cstdlib>
-#include <string_view>
 #include <exception>
 #include <iostream>
 
