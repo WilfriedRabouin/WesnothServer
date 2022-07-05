@@ -196,18 +196,16 @@ void ClientHandler::Receive(CompletionHandler completionHandler)
 				else
 				{
 					const std::string_view data{ reinterpret_cast<char*>(m_readData.data()), m_readData.size() };
+					Gzip::Result result{ Gzip::Uncompress(data) };
 
-					bool gzipError{};
-					std::string message{ Gzip::Uncompress(data, gzipError) };
-
-					if (gzipError)
+					if (result.error)
 					{
 						spdlog::error("{}: receiving failed", m_address);
 					}
 					else
 					{
-						spdlog::debug("{}: receiving {} bytes\n{}", m_address, m_readData.size() + sizeof(SizeField), message);
-						completionHandler(std::move(message));
+						spdlog::debug("{}: receiving {} bytes\n{}", m_address, m_readData.size() + sizeof(SizeField), result.data);
+						completionHandler(std::move(result).data);
 					}
 				}
 			});
@@ -218,19 +216,18 @@ void ClientHandler::Receive(CompletionHandler completionHandler)
 template <typename CompletionHandler>
 void ClientHandler::Send(std::string_view message, CompletionHandler completionHandler)
 {
-	bool gzipError{};
-	const std::string data{ Gzip::Compress(message, gzipError) };
+	const Gzip::Result result{ Gzip::Compress(message) };
 
-	if (gzipError)
+	if (result.error)
 	{
 		spdlog::error("{}: sending failed", m_address);
 	}
 	else
 	{
-		const SizeField sizeField{ std::byteswap(static_cast<SizeField>(data.size())) };
-		m_writeData.resize(sizeof(SizeField) + data.size());
+		const SizeField sizeField{ std::byteswap(static_cast<SizeField>(result.data.size())) };
+		m_writeData.resize(sizeof(SizeField) + result.data.size());
 		std::memcpy(m_writeData.data(), &sizeField, sizeof(SizeField));
-		std::memcpy(m_writeData.data() + sizeof(SizeField), data.data(), data.size());
+		std::memcpy(m_writeData.data() + sizeof(SizeField), result.data.data(), result.data.size());
 
 		spdlog::debug("{}: sending {} bytes\n{}", m_address, m_writeData.size(), message);
 

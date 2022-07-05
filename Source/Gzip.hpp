@@ -24,6 +24,12 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace Gzip
 {
-	[[nodiscard]] std::string Compress(std::string_view data, bool& error);
-	[[nodiscard]] std::string Uncompress(std::string_view data, bool& error);
+	struct Result
+	{
+		std::string data{};
+		bool error{};
+	};
+
+	[[nodiscard]] Result Compress(std::string_view data);
+	[[nodiscard]] Result Uncompress(std::string_view data);
 }

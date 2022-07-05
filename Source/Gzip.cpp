@@ -31,7 +31,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace Gzip
 {
-	[[nodiscard]] std::string Compress(std::string_view data, bool& error)
+	[[nodiscard]] Result Compress(std::string_view data)
 	{
 		boost::iostreams::filtering_istreambuf buffer{};
 		buffer.push(boost::iostreams::gzip_compressor{});
@@ -46,15 +46,13 @@ namespace Gzip
 		catch (const std::ios_base::failure& failure)
 		{
 			spdlog::error("Compression failed ({})", failure.what());
-			error = true;
-			return {};
+			return { {}, true };
 		}
 
-		error = false;
-		return std::move(stringStream).str();
+		return { std::move(stringStream).str(), false };
 	}
 
-	[[nodiscard]] std::string Uncompress(std::string_view data, bool& error)
+	[[nodiscard]] Result Uncompress(std::string_view data)
 	{
 		boost::iostreams::filtering_istreambuf buffer{};
 		buffer.push(boost::iostreams::gzip_decompressor{});
@@ -69,11 +67,9 @@ namespace Gzip
 		catch (const std::ios_base::failure& failure)
 		{
 			spdlog::error("Decompression failed ({})", failure.what());
-			error = true;
-			return {};
+			return { {}, true };
 		}
-		
-		error = false;
-		return std::move(stringStream).str();
+
+		return { std::move(stringStream).str(), false };
 	}
 }
