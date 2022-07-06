@@ -78,17 +78,19 @@ void ClientHandler::StartHandshake()
 	boost::asio::async_read(m_socket, boost::asio::buffer(m_readData),
 		[this, self = shared_from_this()](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 	{
-		constexpr std::array<std::uint8_t, requestSize> normalConnectionRequest{ { 0, 0, 0, 0 } };
-		constexpr std::array<std::uint8_t, requestSize> tlsConnectionRequest{ { 0, 0, 0, 1 } };
-
 		if (error)
 		{
 			if (error != boost::asio::error::connection_reset)
 			{
 				spdlog::error("{}: handshake request failed ({})", m_address, error.message());
 			}
+			return;
 		}
-		else if (std::ranges::equal(m_readData, normalConnectionRequest))
+
+		constexpr std::array<std::uint8_t, requestSize> normalConnectionRequest{ { 0, 0, 0, 0 } };
+		constexpr std::array<std::uint8_t, requestSize> tlsConnectionRequest{ { 0, 0, 0, 1 } };
+
+		if (std::ranges::equal(m_readData, normalConnectionRequest))
 		{
 			m_writeData = { 0xDE, 0xAD, 0xBE, 0xEF };
 
@@ -101,12 +103,11 @@ void ClientHandler::StartHandshake()
 						{
 							spdlog::error("{}: handshake response failed ({})", m_address, error.message());
 						}
+						return;
 					}
-					else
-					{
-						spdlog::info("{}: handshake successful", m_address);
-						StartLogin();
-					}
+
+					spdlog::info("{}: handshake successful", m_address);
+					StartLogin();
 				});
 		}
 		else if (std::ranges::equal(m_readData, tlsConnectionRequest))
@@ -213,12 +214,11 @@ void ClientHandler::Receive(CompletionHandler&& completionHandler)
 			if (result.error)
 			{
 				spdlog::error("{}: receiving failed", m_address);
+				return;
 			}
-			else
-			{
-				spdlog::debug("{}: receiving {} bytes\n{}", m_address, m_readData.size() + sizeof(SizeField), result.data);
-				completionHandler(std::move(result).data);
-			}
+
+			spdlog::debug("{}: receiving {} bytes\n{}", m_address, m_readData.size() + sizeof(SizeField), result.data);
+			completionHandler(std::move(result).data);
 		});
 	});
 }
@@ -250,10 +250,9 @@ void ClientHandler::Send(std::string_view message, CompletionHandler&& completio
 			{
 				spdlog::error("{}: sending failed ({})", m_address, error.message());
 			}
+			return;
 		}
-		else
-		{
-			completionHandler();
-		}
+		
+		completionHandler();
 	});
 }

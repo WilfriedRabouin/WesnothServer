@@ -31,19 +31,22 @@ void Accept(boost::asio::ip::tcp::acceptor& acceptor)
 	acceptor.async_accept(
 		[&acceptor](const boost::system::error_code& error, boost::asio::ip::tcp::socket&& socket)
 		{
-			const Config& config{ Config::GetInstance() };
-
 			if (error)
 			{
 				spdlog::error("Failed to accept new connection: {}", error.message());
 			}
-			else if (config.isClientCountLimited && ClientHandler::GetInstanceCount() == config.clientCountLimit)
-			{
-				spdlog::warn("{}: connection refused (client count limit reached)", socket.remote_endpoint().address().to_string());
-			}
 			else
 			{
-				ClientHandler::create(std::move(socket))->StartHandshake();
+				const Config& config{ Config::GetInstance() };
+
+				if (config.isClientCountLimited && ClientHandler::GetInstanceCount() == config.clientCountLimit)
+				{
+					spdlog::warn("{}: connection refused (client count limit reached)", socket.remote_endpoint().address().to_string());
+				}
+				else
+				{
+					ClientHandler::create(std::move(socket))->StartHandshake();
+				}
 			}
 
 			Accept(acceptor);
