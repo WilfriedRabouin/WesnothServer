@@ -83,7 +83,10 @@ void ClientHandler::StartHandshake()
 
 		if (error)
 		{
-			spdlog::error("{}: handshake request failed ({})", m_address, error.message());
+			if (error != boost::asio::error::connection_reset)
+			{
+				spdlog::error("{}: handshake request failed ({})", m_address, error.message());
+			}
 		}
 		else if (std::ranges::equal(m_readData, normalConnectionRequest))
 		{
@@ -94,7 +97,10 @@ void ClientHandler::StartHandshake()
 				{
 					if (error)
 					{
-						spdlog::error("{}: handshake response failed ({})", m_address, error.message());
+						if (error != boost::asio::error::connection_reset)
+						{
+							spdlog::error("{}: handshake response failed ({})", m_address, error.message());
+						}
 					}
 					else
 					{
@@ -172,7 +178,10 @@ void ClientHandler::Receive(CompletionHandler&& completionHandler)
 	{
 		if (error)
 		{
-			spdlog::error("{}: receiving failed ({})", m_address, error.message());
+			if (error != boost::asio::error::connection_reset)
+			{
+				spdlog::error("{}: receiving failed ({})", m_address, error.message());
+			}
 		}
 		else
 		{
@@ -191,7 +200,10 @@ void ClientHandler::Receive(CompletionHandler&& completionHandler)
 			{
 				if (error)
 				{
-					spdlog::error("{}: receiving failed ({})", m_address, error.message());
+					if (error != boost::asio::error::connection_reset)
+					{
+						spdlog::error("{}: receiving failed ({})", m_address, error.message());
+					}
 				}
 				else
 				{
@@ -236,7 +248,10 @@ void ClientHandler::Send(std::string_view message, CompletionHandler&& completio
 		{
 			if (error)
 			{
-				spdlog::error("{}: sending failed ({})", m_address, error.message());
+				if (error != boost::asio::error::connection_reset)
+				{
+					spdlog::error("{}: sending failed ({})", m_address, error.message());
+				}
 			}
 			else
 			{
