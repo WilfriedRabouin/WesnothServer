@@ -21,8 +21,9 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <cstdint>
 
-struct Config
+class Config
 {
+public:
 	[[nodiscard]] static bool Init(int argc, char* argv[]);
 	[[nodiscard]] static const Config& GetInstance();
 
