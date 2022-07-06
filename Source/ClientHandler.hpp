@@ -33,6 +33,11 @@ public:
 	[[nodiscard]] static std::shared_ptr<ClientHandler> create(boost::asio::ip::tcp::socket socket);
 	[[nodiscard]] static std::size_t GetInstanceCount();
 
+	ClientHandler(const ClientHandler&) = delete;
+	ClientHandler(ClientHandler&&) = delete;
+	ClientHandler& operator=(const ClientHandler&) = delete;
+	ClientHandler& operator=(ClientHandler&&) = delete;
+
 	~ClientHandler();
 
 	void StartHandshake();
