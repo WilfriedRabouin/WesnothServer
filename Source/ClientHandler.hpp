@@ -48,10 +48,10 @@ private:
 	void StartLogin();
 
 	template <typename CompletionHandler>
-	void Receive(CompletionHandler completionHandler);
+	void Receive(CompletionHandler&& completionHandler);
 
 	template <typename CompletionHandler>
-	void Send(std::string_view message, CompletionHandler completionHandler);
+	void Send(std::string_view message, CompletionHandler&& completionHandler);
 
 	static std::size_t s_instanceCount;
 

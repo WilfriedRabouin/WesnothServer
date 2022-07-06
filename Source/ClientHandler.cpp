@@ -163,12 +163,12 @@ void ClientHandler::StartLogin()
 }
 
 template <typename CompletionHandler>
-void ClientHandler::Receive(CompletionHandler completionHandler)
+void ClientHandler::Receive(CompletionHandler&& completionHandler)
 {
 	m_readData.resize(sizeof(SizeField));
 
 	boost::asio::async_read(m_socket, boost::asio::buffer(m_readData),
-		[this, self = shared_from_this(), completionHandler = std::move(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/) mutable
+		[this, self = shared_from_this(), completionHandler = std::forward<CompletionHandler>(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/) mutable
 	{
 		if (error)
 		{
@@ -214,7 +214,7 @@ void ClientHandler::Receive(CompletionHandler completionHandler)
 }
 
 template <typename CompletionHandler>
-void ClientHandler::Send(std::string_view message, CompletionHandler completionHandler)
+void ClientHandler::Send(std::string_view message, CompletionHandler&& completionHandler)
 {
 	const Gzip::Result result{ Gzip::Compress(message) };
 
@@ -232,7 +232,7 @@ void ClientHandler::Send(std::string_view message, CompletionHandler completionH
 		spdlog::debug("{}: sending {} bytes\n{}", m_address, m_writeData.size(), message);
 
 		boost::asio::async_write(m_socket, boost::asio::buffer(m_writeData),
-			[this, self = shared_from_this(), completionHandler = std::move(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+			[this, self = shared_from_this(), completionHandler = std::forward<CompletionHandler>(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 		{
 			if (error)
 			{
