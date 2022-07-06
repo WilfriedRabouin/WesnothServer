@@ -182,46 +182,44 @@ void ClientHandler::Receive(CompletionHandler&& completionHandler)
 			{
 				spdlog::error("{}: receiving failed ({})", m_address, error.message());
 			}
+			return;
 		}
-		else
+
+		const SizeField sizeField = [this]
 		{
-			const SizeField sizeField = [this]
+			SizeField sizeField{};
+			std::memcpy(&sizeField, m_readData.data(), sizeof(SizeField));
+			return sizeField;
+		}();
+
+		const std::size_t dataSize{ std::byteswap(sizeField) };
+		m_readData.resize(dataSize);
+
+		boost::asio::async_read(m_socket, boost::asio::buffer(m_readData),
+			[this, self, completionHandler = std::move(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+		{
+			if (error)
 			{
-				SizeField sizeField{};
-				std::memcpy(&sizeField, m_readData.data(), sizeof(SizeField));
-				return sizeField;
-			}();
+				if (error != boost::asio::error::connection_reset)
+				{
+					spdlog::error("{}: receiving failed ({})", m_address, error.message());
+				}
+				return;
+			}
 
-			const std::size_t dataSize{ std::byteswap(sizeField) };
-			m_readData.resize(dataSize);
+			const std::string_view data{ reinterpret_cast<char*>(m_readData.data()), m_readData.size() };
+			Gzip::Result result{ Gzip::Uncompress(data) };
 
-			boost::asio::async_read(m_socket, boost::asio::buffer(m_readData),
-				[this, self, completionHandler = std::move(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+			if (result.error)
 			{
-				if (error)
-				{
-					if (error != boost::asio::error::connection_reset)
-					{
-						spdlog::error("{}: receiving failed ({})", m_address, error.message());
-					}
-				}
-				else
-				{
-					const std::string_view data{ reinterpret_cast<char*>(m_readData.data()), m_readData.size() };
-					Gzip::Result result{ Gzip::Uncompress(data) };
-
-					if (result.error)
-					{
-						spdlog::error("{}: receiving failed", m_address);
-					}
-					else
-					{
-						spdlog::debug("{}: receiving {} bytes\n{}", m_address, m_readData.size() + sizeof(SizeField), result.data);
-						completionHandler(std::move(result).data);
-					}
-				}
-			});
-		}
+				spdlog::error("{}: receiving failed", m_address);
+			}
+			else
+			{
+				spdlog::debug("{}: receiving {} bytes\n{}", m_address, m_readData.size() + sizeof(SizeField), result.data);
+				completionHandler(std::move(result).data);
+			}
+		});
 	});
 }
 
@@ -233,30 +231,29 @@ void ClientHandler::Send(std::string_view message, CompletionHandler&& completio
 	if (result.error)
 	{
 		spdlog::error("{}: sending failed", m_address);
+		return;
 	}
-	else
+
+	const SizeField sizeField{ std::byteswap(static_cast<SizeField>(result.data.size())) };
+	m_writeData.resize(sizeof(SizeField) + result.data.size());
+	std::memcpy(m_writeData.data(), &sizeField, sizeof(SizeField));
+	std::memcpy(m_writeData.data() + sizeof(SizeField), result.data.data(), result.data.size());
+
+	spdlog::debug("{}: sending {} bytes\n{}", m_address, m_writeData.size(), message);
+
+	boost::asio::async_write(m_socket, boost::asio::buffer(m_writeData),
+		[this, self = shared_from_this(), completionHandler = std::forward<CompletionHandler>(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
 	{
-		const SizeField sizeField{ std::byteswap(static_cast<SizeField>(result.data.size())) };
-		m_writeData.resize(sizeof(SizeField) + result.data.size());
-		std::memcpy(m_writeData.data(), &sizeField, sizeof(SizeField));
-		std::memcpy(m_writeData.data() + sizeof(SizeField), result.data.data(), result.data.size());
-
-		spdlog::debug("{}: sending {} bytes\n{}", m_address, m_writeData.size(), message);
-
-		boost::asio::async_write(m_socket, boost::asio::buffer(m_writeData),
-			[this, self = shared_from_this(), completionHandler = std::forward<CompletionHandler>(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
+		if (error)
 		{
-			if (error)
+			if (error != boost::asio::error::connection_reset)
 			{
-				if (error != boost::asio::error::connection_reset)
-				{
-					spdlog::error("{}: sending failed ({})", m_address, error.message());
-				}
+				spdlog::error("{}: sending failed ({})", m_address, error.message());
 			}
-			else
-			{
-				completionHandler();
-			}
-		});
-	}
+		}
+		else
+		{
+			completionHandler();
+		}
+	});
 }
