@@ -2,7 +2,7 @@
 
 project (WesnothServer)
 
-find_package (Boost 1.79.0 REQUIRED COMPONENTS iostreams)
+find_package (Boost 1.79.0 REQUIRED COMPONENTS iostreams program_options)
 find_package (spdlog 1.10.0 REQUIRED)
 
 add_executable (${PROJECT_NAME}
@@ -25,7 +25,7 @@ set_target_properties (${PROJECT_NAME} PROPERTIES
 )
 
 target_include_directories (${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries (${PROJECT_NAME} PRIVATE Boost::iostreams spdlog::spdlog)
+target_link_libraries (${PROJECT_NAME} PRIVATE Boost::iostreams Boost::program_options spdlog::spdlog)
 
 # TODO: use COMPILE_WARNING_AS_ERROR instead of /WX flag once CMake 3.24 is available
 if (MSVC)
