@@ -54,7 +54,7 @@ constexpr std::string_view gamelistMessage{
 
 std::size_t ClientHandler::s_instanceCount{};
 
-[[nodiscard]] std::shared_ptr<ClientHandler> ClientHandler::create(boost::asio::ip::tcp::socket socket)
+[[nodiscard]] std::shared_ptr<ClientHandler> ClientHandler::create(boost::asio::ip::tcp::socket&& socket)
 {
 	return std::shared_ptr<ClientHandler>{ new ClientHandler{ std::move(socket) } };
 }
@@ -115,7 +115,7 @@ void ClientHandler::StartHandshake()
 	});
 }
 
-ClientHandler::ClientHandler(boost::asio::ip::tcp::socket socket)
+ClientHandler::ClientHandler(boost::asio::ip::tcp::socket&& socket)
 	: m_address{ socket.remote_endpoint().address().to_string() }, m_socket{ std::move(socket) }
 {
 	spdlog::info("{}: connected", m_address);
