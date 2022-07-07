@@ -57,6 +57,6 @@ private:
 
 	const std::string m_address{};
 	boost::asio::ip::tcp::socket m_socket;
-	std::vector<std::uint8_t> m_readData{};
-	std::vector<std::uint8_t> m_writeData{};
+	std::vector<std::uint8_t> m_readBuffer{};
+	std::vector<std::uint8_t> m_writeBuffer{};
 };
