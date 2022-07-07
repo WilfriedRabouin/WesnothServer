@@ -24,6 +24,14 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 class Config
 {
 public:
+	enum class CompressionLevel
+	{
+		None,
+		Speed,
+		Default,
+		Size
+	};
+
 	[[nodiscard]] static bool Init(int argc, char* argv[]);
 	[[nodiscard]] static const Config& GetInstance();
 
@@ -35,11 +43,9 @@ public:
 	bool isClientCountLimited{ true };
 	std::size_t clientCountLimit{ 1 };
 	std::size_t bufferCapacity{ 128 };
-	bool isThreadCountAuto{ true };
-	std::size_t threadCount{ 1 };
-	
-	// TODO: add
-	// - compression level ("none", "speed", "default", "size")
+	bool isClientHandlerThreadCountAuto{ true };
+	std::size_t clientHandlerThreadCount{ 1 };
+	CompressionLevel compressionLevel{ CompressionLevel::Default };
 
 private:
 	Config() = default;
