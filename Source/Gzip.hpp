@@ -32,13 +32,13 @@ namespace Gzip
 		Size
 	};
 
-	void SetCompressionLevel(CompressionLevel level);
-
 	struct Result
 	{
 		std::string data{};
 		bool error{};
 	};
+
+	void SetCompressionLevel(CompressionLevel level);
 
 	[[nodiscard]] Result Compress(std::string_view data);
 	[[nodiscard]] Result Uncompress(std::string_view data);
