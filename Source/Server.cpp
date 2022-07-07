@@ -18,6 +18,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <utility>
+#include <map>
 
 #include <boost/asio.hpp>
 #include <spdlog/spdlog.h>
@@ -25,6 +26,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include "Server.hpp"
 #include "ClientHandler.hpp"
 #include "Config.hpp"
+#include "Gzip.hpp"
 
 void Accept(boost::asio::ip::tcp::acceptor& acceptor)
 {
@@ -55,6 +57,25 @@ void Accept(boost::asio::ip::tcp::acceptor& acceptor)
 
 void RunServer()
 {
+	static const std::map<Config::CompressionLevel, Gzip::CompressionLevel> compressionLevelMapping{ 
+		{ Config::CompressionLevel::None, Gzip::CompressionLevel::None },
+		{ Config::CompressionLevel::Speed, Gzip::CompressionLevel::Speed },
+		{ Config::CompressionLevel::Default, Gzip::CompressionLevel::Default },
+		{ Config::CompressionLevel::Size, Gzip::CompressionLevel::Size }
+	};
+
+	const Config::CompressionLevel compressionLevel{ Config::GetInstance().compressionLevel };
+
+	if (compressionLevelMapping.contains(compressionLevel))
+	{
+		Gzip::SetCompressionLevel(compressionLevelMapping.at(compressionLevel));
+	}
+	else
+	{
+		spdlog::error("Config compression level {} not mapped to a GZIP compression level", compressionLevel);
+		Gzip::SetCompressionLevel(Gzip::CompressionLevel::Default);
+	}
+
 	constexpr boost::asio::ip::port_type port{ 15000 };
 	const boost::asio::ip::tcp::endpoint endpoint{ boost::asio::ip::tcp::v4(), port };
 	boost::asio::io_context ioContext{};
