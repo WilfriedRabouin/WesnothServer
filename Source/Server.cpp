@@ -72,7 +72,7 @@ void RunServer()
 	}
 	else
 	{
-		spdlog::error("Config compression level {} not mapped to a GZIP compression level", static_cast<int>(compressionLevel));
+		spdlog::error("Config compression level {} not mapped", static_cast<int>(compressionLevel));
 	}
 
 	constexpr boost::asio::ip::port_type port{ 15000 };

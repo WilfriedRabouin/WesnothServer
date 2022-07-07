@@ -24,6 +24,16 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace Gzip
 {
+	enum class CompressionLevel : int
+	{
+		None,
+		Speed,
+		Default,
+		Size
+	};
+
+	void SetCompressionLevel(CompressionLevel level);
+
 	struct Result
 	{
 		std::string data{};

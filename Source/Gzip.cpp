@@ -20,6 +20,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <sstream>
 #include <utility>
 #include <ios>
+#include <map>
 
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
@@ -29,12 +30,33 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "Gzip.hpp"
 
+static int s_compressionLevel{ boost::iostreams::gzip::default_compression };
+
 namespace Gzip
 {
+	void SetCompressionLevel(CompressionLevel level)
+	{
+		static const std::map<CompressionLevel, int> mapping{
+			{ CompressionLevel::None, boost::iostreams::gzip::no_compression },
+			{ CompressionLevel::Speed, boost::iostreams::gzip::best_speed },
+			{ CompressionLevel::Default, boost::iostreams::gzip::default_compression },
+			{ CompressionLevel::Size, boost::iostreams::gzip::best_compression }
+		};
+
+		if (mapping.contains(level))
+		{
+			s_compressionLevel = mapping.at(level);
+		}
+		else
+		{
+			spdlog::error("GZIP compression level {} not mapped", static_cast<int>(level));
+		}
+	}
+
 	[[nodiscard]] Result Compress(std::string_view data)
 	{
 		boost::iostreams::filtering_istreambuf buffer{};
-		buffer.push(boost::iostreams::gzip_compressor{});
+		buffer.push(boost::iostreams::gzip_compressor{ s_compressionLevel });
 		buffer.push(boost::iostreams::array_source{ data.data(), data.size() });
 
 		std::stringstream stringStream{};
