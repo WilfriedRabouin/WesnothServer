@@ -27,6 +27,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "ClientHandler.hpp"
 #include "Gzip.hpp"
+#include "Config.hpp"
 
 using SizeField = std::uint32_t;
 
@@ -127,6 +128,10 @@ ClientHandler::ClientHandler(boost::asio::ip::tcp::socket&& socket)
 {
 	spdlog::info("{}: connected", m_address);
 	++s_instanceCount;
+
+	const Config& config{ Config::GetInstance() };
+	m_readBuffer.reserve(config.bufferCapacity);
+	m_writeBuffer.reserve(config.bufferCapacity);
 }
 
 // WIP
@@ -193,8 +198,15 @@ void ClientHandler::Receive(CompletionHandler&& completionHandler)
 			return sizeField;
 		}();
 
-		const std::size_t dataSize{ std::byteswap(sizeField) };
-		m_readBuffer.resize(dataSize);
+		const std::size_t size{ std::byteswap(sizeField) };
+
+		if (size > m_readBuffer.capacity())
+		{
+			spdlog::error("{}: receiving {} bytes failed (buffer overflow)", m_address, size);
+			return;
+		}
+
+		m_readBuffer.resize(size);
 
 		boost::asio::async_read(m_socket, boost::asio::buffer(m_readBuffer),
 			[this, self, completionHandler = std::move(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
@@ -234,8 +246,17 @@ void ClientHandler::Send(std::string_view message, CompletionHandler&& completio
 		return;
 	}
 
+	const std::size_t size{ sizeof(SizeField) + result.data.size() };
+
+	if (size > m_writeBuffer.capacity())
+	{
+		spdlog::error("{}: sending {} bytes failed (buffer overflow)", m_address, size);
+		return;
+	}
+
+	m_writeBuffer.resize(size);
+
 	const SizeField sizeField{ std::byteswap(static_cast<SizeField>(result.data.size())) };
-	m_writeBuffer.resize(sizeof(SizeField) + result.data.size());
 	std::memcpy(m_writeBuffer.data(), &sizeField, sizeof(SizeField));
 	std::memcpy(m_writeBuffer.data() + sizeof(SizeField), result.data.data(), result.data.size());
 
