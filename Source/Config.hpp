@@ -40,7 +40,6 @@ public:
 	
 	// TODO: add
 	// - compression level ("none", "speed", "default", "size")
-	// - thread count ("auto" or positive non zero integer)
 
 private:
 	Config() = default;
