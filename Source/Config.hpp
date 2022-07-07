@@ -34,10 +34,12 @@ public:
 
 	bool isClientCountLimited{ true };
 	std::size_t clientCountLimit{ 1 };
+	std::size_t bufferCapacity{ 4 };
+	bool isThreadCountAuto{ true };
+	std::size_t threadCount{ 1 };
 	
 	// TODO: add
 	// - compression level ("none", "speed", "default", "size")
-	// - initial size for read and write buffers
 	// - thread count ("auto" or positive non zero integer)
 
 private:
