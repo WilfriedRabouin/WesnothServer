@@ -43,8 +43,8 @@ public:
 	bool isClientCountLimited{ true };
 	std::size_t clientCountLimit{ 1 };
 	std::size_t bufferCapacity{ 128 };
-	bool isClientHandlerThreadCountAuto{ true };
-	std::size_t clientHandlerThreadCount{ 1 };
+	bool isThreadCountAuto{ true };
+	std::size_t threadCount{ 1 };
 	CompressionLevel compressionLevel{ CompressionLevel::Default };
 
 private:
