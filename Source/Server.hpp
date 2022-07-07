@@ -19,4 +19,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
-void RunServer();
+namespace Server
+{
+	void Run();
+}

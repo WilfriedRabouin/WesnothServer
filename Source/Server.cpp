@@ -55,30 +55,33 @@ void Accept(boost::asio::ip::tcp::acceptor& acceptor)
 		});
 }
 
-void RunServer()
+namespace Server
 {
-	static const std::map<Config::CompressionLevel, Gzip::CompressionLevel> compressionLevelMapping{ 
-		{ Config::CompressionLevel::None, Gzip::CompressionLevel::None },
-		{ Config::CompressionLevel::Speed, Gzip::CompressionLevel::Speed },
-		{ Config::CompressionLevel::Default, Gzip::CompressionLevel::Default },
-		{ Config::CompressionLevel::Size, Gzip::CompressionLevel::Size }
-	};
-
-	const Config::CompressionLevel compressionLevel{ Config::GetInstance().compressionLevel };
-
-	if (compressionLevelMapping.contains(compressionLevel))
+	void Run()
 	{
-		Gzip::SetCompressionLevel(compressionLevelMapping.at(compressionLevel));
-	}
-	else
-	{
-		spdlog::error("Config compression level {} not mapped", static_cast<int>(compressionLevel));
-	}
+		static const std::map<Config::CompressionLevel, Gzip::CompressionLevel> compressionLevelMapping{
+			{ Config::CompressionLevel::None, Gzip::CompressionLevel::None },
+			{ Config::CompressionLevel::Speed, Gzip::CompressionLevel::Speed },
+			{ Config::CompressionLevel::Default, Gzip::CompressionLevel::Default },
+			{ Config::CompressionLevel::Size, Gzip::CompressionLevel::Size }
+		};
 
-	constexpr boost::asio::ip::port_type port{ 15000 };
-	const boost::asio::ip::tcp::endpoint endpoint{ boost::asio::ip::tcp::v4(), port };
-	boost::asio::io_context ioContext{};
-	boost::asio::ip::tcp::acceptor acceptor{ ioContext, endpoint };
-	Accept(acceptor);
-	ioContext.run();
+		const Config::CompressionLevel compressionLevel{ Config::GetInstance().compressionLevel };
+
+		if (compressionLevelMapping.contains(compressionLevel))
+		{
+			Gzip::SetCompressionLevel(compressionLevelMapping.at(compressionLevel));
+		}
+		else
+		{
+			spdlog::error("Config compression level {} not mapped", static_cast<int>(compressionLevel));
+		}
+
+		constexpr boost::asio::ip::port_type port{ 15000 };
+		const boost::asio::ip::tcp::endpoint endpoint{ boost::asio::ip::tcp::v4(), port };
+		boost::asio::io_context ioContext{};
+		boost::asio::ip::tcp::acceptor acceptor{ ioContext, endpoint };
+		Accept(acceptor);
+		ioContext.run();
+	}
 }

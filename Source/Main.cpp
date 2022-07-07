@@ -35,8 +35,8 @@ int main(int argc, char* argv[])
 	}
 
 	std::cout
-		<< "Wesnoth Server - version " << g_serverVersion << "\n"
-		<< "Compatible with client version " << g_clientVersion << "\n\n";
+		<< "Wesnoth Server - version " << Versions::g_server << "\n"
+		<< "Compatible with client version " << Versions::g_client << "\n\n";
 
 #ifdef _DEBUG
 	spdlog::set_level(spdlog::level::debug);
@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
 
 	try
 	{
-		RunServer();
+		Server::Run();
 		return EXIT_SUCCESS;
 	}
 	catch (const std::exception& exception)
