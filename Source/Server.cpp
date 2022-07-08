@@ -41,7 +41,7 @@ void Accept(boost::asio::ip::tcp::acceptor& acceptor)
 			}
 			else
 			{
-				if (ClientHandler::GetInstanceCount() == Config::GetInstance().clientCountLimit)
+				if (ClientHandler::GetInstanceCount() == Config::GetInstance().clientCountLimitTotal)
 				{
 					spdlog::warn("{}: connection refused (client count limit reached)", socket.remote_endpoint().address().to_string());
 				}
