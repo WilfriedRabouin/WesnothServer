@@ -67,7 +67,7 @@ std::size_t ClientHandler::s_instanceCount{};
 
 ClientHandler::~ClientHandler()
 {
-	spdlog::info("{}: disconnected", m_address);
+	spdlog::info("{}: disconnected", m_ipAddress);
 	--s_instanceCount;
 }
 
@@ -83,7 +83,7 @@ void ClientHandler::StartHandshake()
 		{
 			if (error != boost::asio::error::connection_reset)
 			{
-				spdlog::error("{}: handshake request failed ({})", m_address, error.message());
+				spdlog::error("{}: handshake request failed ({})", m_ipAddress, error.message());
 			}
 			return;
 		}
@@ -102,31 +102,31 @@ void ClientHandler::StartHandshake()
 					{
 						if (error != boost::asio::error::connection_reset)
 						{
-							spdlog::error("{}: handshake response failed ({})", m_address, error.message());
+							spdlog::error("{}: handshake response failed ({})", m_ipAddress, error.message());
 						}
 						return;
 					}
 
-					spdlog::info("{}: handshake successful", m_address);
+					spdlog::info("{}: handshake successful", m_ipAddress);
 					StartLogin();
 				});
 		}
 		else if (std::ranges::equal(m_readBuffer, tlsConnectionRequest))
 		{
-			spdlog::warn("{}: handshake request failed (TLS not implemented yet)", m_address);
+			spdlog::warn("{}: handshake request failed (TLS not implemented yet)", m_ipAddress);
 			// TODO: implement TLS
 		}
 		else
 		{
-			spdlog::error("{}: handshake request failed (wrong data)", m_address);
+			spdlog::error("{}: handshake request failed (wrong data)", m_ipAddress);
 		}
 	});
 }
 
 ClientHandler::ClientHandler(boost::asio::ip::tcp::socket&& socket)
-	: m_address{ socket.remote_endpoint().address().to_string() }, m_socket{ std::move(socket) }
+	: m_ipAddress{ socket.remote_endpoint().address().to_string() }, m_socket{ std::move(socket) }
 {
-	spdlog::info("{}: connected", m_address);
+	spdlog::info("{}: connected", m_ipAddress);
 	++s_instanceCount;
 
 	const Config& config{ Config::GetInstance() };
@@ -159,7 +159,7 @@ void ClientHandler::StartLogin()
 											Send(gamelistMessage,
 												[this]
 												{
-													spdlog::info("{}: login successful", m_address);
+													spdlog::info("{}: login successful", m_ipAddress);
 
 													Receive(
 														[this](std::string&& /*message*/)
@@ -186,7 +186,7 @@ void ClientHandler::Receive(CompletionHandler&& completionHandler)
 		{
 			if (error != boost::asio::error::connection_reset)
 			{
-				spdlog::error("{}: receiving failed ({})", m_address, error.message());
+				spdlog::error("{}: receiving failed ({})", m_ipAddress, error.message());
 			}
 			return;
 		}
@@ -202,7 +202,7 @@ void ClientHandler::Receive(CompletionHandler&& completionHandler)
 
 		if (size > m_readBuffer.capacity())
 		{
-			spdlog::error("{}: receiving {} bytes failed (buffer overflow)", m_address, size);
+			spdlog::error("{}: receiving {} bytes failed (buffer overflow)", m_ipAddress, size);
 			return;
 		}
 
@@ -215,7 +215,7 @@ void ClientHandler::Receive(CompletionHandler&& completionHandler)
 			{
 				if (error != boost::asio::error::connection_reset)
 				{
-					spdlog::error("{}: receiving failed ({})", m_address, error.message());
+					spdlog::error("{}: receiving failed ({})", m_ipAddress, error.message());
 				}
 				return;
 			}
@@ -225,11 +225,11 @@ void ClientHandler::Receive(CompletionHandler&& completionHandler)
 
 			if (result.error)
 			{
-				spdlog::error("{}: receiving failed", m_address);
+				spdlog::error("{}: receiving failed", m_ipAddress);
 				return;
 			}
 
-			spdlog::debug("{}: receiving {} bytes\n{}", m_address, m_readBuffer.size() + sizeof(SizeField), result.data);
+			spdlog::debug("{}: receiving {} bytes\n{}", m_ipAddress, m_readBuffer.size() + sizeof(SizeField), result.data);
 			completionHandler(std::move(result).data);
 		});
 	});
@@ -242,7 +242,7 @@ void ClientHandler::Send(std::string_view message, CompletionHandler&& completio
 
 	if (result.error)
 	{
-		spdlog::error("{}: sending failed", m_address);
+		spdlog::error("{}: sending failed", m_ipAddress);
 		return;
 	}
 
@@ -250,7 +250,7 @@ void ClientHandler::Send(std::string_view message, CompletionHandler&& completio
 
 	if (size > m_writeBuffer.capacity())
 	{
-		spdlog::error("{}: sending {} bytes failed (buffer overflow)", m_address, size);
+		spdlog::error("{}: sending {} bytes failed (buffer overflow)", m_ipAddress, size);
 		return;
 	}
 
@@ -260,7 +260,7 @@ void ClientHandler::Send(std::string_view message, CompletionHandler&& completio
 	std::memcpy(m_writeBuffer.data(), &sizeField, sizeof(SizeField));
 	std::memcpy(m_writeBuffer.data() + sizeof(SizeField), result.data.data(), result.data.size());
 
-	spdlog::debug("{}: sending {} bytes\n{}", m_address, m_writeBuffer.size(), message);
+	spdlog::debug("{}: sending {} bytes\n{}", m_ipAddress, m_writeBuffer.size(), message);
 
 	boost::asio::async_write(m_socket, boost::asio::buffer(m_writeBuffer),
 		[this, self = shared_from_this(), completionHandler = std::forward<CompletionHandler>(completionHandler)](const boost::system::error_code& error, std::size_t /*bytesTransferred*/)
@@ -269,7 +269,7 @@ void ClientHandler::Send(std::string_view message, CompletionHandler&& completio
 		{
 			if (error != boost::asio::error::connection_reset)
 			{
-				spdlog::error("{}: sending failed ({})", m_address, error.message());
+				spdlog::error("{}: sending failed ({})", m_ipAddress, error.message());
 			}
 			return;
 		}

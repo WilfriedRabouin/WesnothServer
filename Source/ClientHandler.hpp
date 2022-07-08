@@ -55,7 +55,7 @@ private:
 
 	static std::size_t s_instanceCount;
 
-	const std::string m_address{};
+	const std::string m_ipAddress{};
 	boost::asio::ip::tcp::socket m_socket;
 	std::vector<std::uint8_t> m_readBuffer{};
 	std::vector<std::uint8_t> m_writeBuffer{};
