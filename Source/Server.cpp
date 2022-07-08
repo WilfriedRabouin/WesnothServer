@@ -19,9 +19,11 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <utility>
 #include <map>
+#include <stdexcept>
 
 #include <boost/asio.hpp>
 #include <spdlog/spdlog.h>
+#include <fmt/core.h>
 
 #include "Server.hpp"
 #include "ClientHandler.hpp"
@@ -72,7 +74,7 @@ namespace Server
 		}
 		else
 		{
-			spdlog::error("Config compression level {} not mapped", std::to_underlying(compressionLevel));
+			throw std::runtime_error{ fmt::format("Config compression level {} not mapped", std::to_underlying(compressionLevel)) };
 		}
 
 		constexpr boost::asio::ip::port_type port{ 15000 };
