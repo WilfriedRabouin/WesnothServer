@@ -21,12 +21,14 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <utility>
 #include <ios>
 #include <map>
+#include <stdexcept>
 
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/copy.hpp>
 
 #include <spdlog/spdlog.h>
+#include <fmt/core.h>
 
 #include "Gzip.hpp"
 
@@ -49,7 +51,7 @@ namespace Gzip
 		}
 		else
 		{
-			spdlog::error("GZIP compression level {} not mapped", std::to_underlying(level));
+			throw std::runtime_error{ fmt::format("GZIP compression level {} not mapped", std::to_underlying(level)) };
 		}
 	}
 
