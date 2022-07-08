@@ -49,7 +49,7 @@ namespace Gzip
 		}
 		else
 		{
-			spdlog::error("GZIP compression level {} not mapped", static_cast<int>(level));
+			spdlog::error("GZIP compression level {} not mapped", std::to_underlying(level));
 		}
 	}
 

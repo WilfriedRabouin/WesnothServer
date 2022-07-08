@@ -24,7 +24,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 class Config
 {
 public:
-	enum class CompressionLevel : int
+	enum class CompressionLevel
 	{
 		None,
 		Speed,

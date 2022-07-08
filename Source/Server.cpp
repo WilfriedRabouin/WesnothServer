@@ -74,7 +74,7 @@ namespace Server
 		}
 		else
 		{
-			spdlog::error("Config compression level {} not mapped", static_cast<int>(compressionLevel));
+			spdlog::error("Config compression level {} not mapped", std::to_underlying(compressionLevel));
 		}
 
 		constexpr boost::asio::ip::port_type port{ 15000 };

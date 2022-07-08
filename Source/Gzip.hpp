@@ -24,7 +24,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace Gzip
 {
-	enum class CompressionLevel : int
+	enum class CompressionLevel
 	{
 		None,
 		Speed,
