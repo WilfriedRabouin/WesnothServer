@@ -43,6 +43,7 @@ int main(int argc, char* argv[])
 #ifdef _DEBUG
 	spdlog::set_level(spdlog::level::debug);
 #endif
+	spdlog::set_pattern("[%Y-%m-%d %T.%e] [%t] [%^%l%$] %v");
 
 	try
 	{
