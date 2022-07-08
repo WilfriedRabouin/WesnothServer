@@ -29,7 +29,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 int main(int argc, char* argv[])
 {
-	if (Config::Init(argc, argv))
+	if (!Config::Init(argc, argv))
 	{
 		return EXIT_SUCCESS;
 	}

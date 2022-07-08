@@ -44,7 +44,7 @@ Config Config::s_instance{};
 	if (variablesMap.count("help"))
 	{
 		std::cout << optionsDescription << "\n";
-		return true;
+		return false;
 	}
 
 	/*if (vm.count("compression")) {
@@ -67,7 +67,7 @@ Config Config::s_instance{};
 		}
 	}*/
 
-	return false;
+	return true;
 }
 
 [[nodiscard]] const Config& Config::GetInstance()
