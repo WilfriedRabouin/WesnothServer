@@ -34,11 +34,8 @@ int main(int argc, char* argv[])
 		return EXIT_SUCCESS;
 	}
 
-	fmt::print(
-		"Wesnoth Server - version {}\n"
-		"Compatible with client version {}\n\n",
-		Versions::g_server, Versions::g_client
-	);
+	fmt::print(Versions::g_formatString, Versions::g_server, Versions::g_client);
+	fmt::print("\n\n");
 
 #ifdef _DEBUG
 	spdlog::set_level(spdlog::level::debug);
