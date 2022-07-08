@@ -40,7 +40,7 @@ public:
 	Config& operator=(const Config&) = delete;
 	Config& operator=(Config&&) = delete;
 
-	std::size_t clientCountLimit{ 1 };
+	std::size_t clientCountLimit{ 3 };
 	std::size_t bufferCapacity{ 128 };
 	bool isThreadCountAuto{ true };
 	std::size_t threadCount{ 1 };
