@@ -19,9 +19,9 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <cstdlib>
 #include <exception>
-#include <iostream>
 
 #include <spdlog/spdlog.h>
+#include <fmt/core.h>
 
 #include "Server.hpp"
 #include "Versions.hpp"
@@ -34,9 +34,11 @@ int main(int argc, char* argv[])
 		return EXIT_SUCCESS;
 	}
 
-	std::cout
-		<< "Wesnoth Server - version " << Versions::g_server << "\n"
-		<< "Compatible with client version " << Versions::g_client << "\n\n";
+	fmt::print(
+		"Wesnoth Server - version {}\n"
+		"Compatible with client version {}\n\n",
+		Versions::g_server, Versions::g_client
+	);
 
 #ifdef _DEBUG
 	spdlog::set_level(spdlog::level::debug);
