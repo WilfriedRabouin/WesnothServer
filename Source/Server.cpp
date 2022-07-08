@@ -59,7 +59,8 @@ namespace Server
 {
 	void Run()
 	{
-		static const std::map<Config::CompressionLevel, Gzip::CompressionLevel> compressionLevelMapping{
+		static const std::map<Config::CompressionLevel, Gzip::CompressionLevel> compressionLevelMapping
+		{
 			{ Config::CompressionLevel::None, Gzip::CompressionLevel::None },
 			{ Config::CompressionLevel::Speed, Gzip::CompressionLevel::Speed },
 			{ Config::CompressionLevel::Default, Gzip::CompressionLevel::Default },

@@ -38,7 +38,8 @@ namespace Gzip
 {
 	void SetCompressionLevel(CompressionLevel level)
 	{
-		static const std::map<CompressionLevel, int> mapping{
+		static const std::map<CompressionLevel, int> mapping
+		{
 			{ CompressionLevel::None, boost::iostreams::gzip::no_compression },
 			{ CompressionLevel::Speed, boost::iostreams::gzip::best_speed },
 			{ CompressionLevel::Default, boost::iostreams::gzip::default_compression },

@@ -31,24 +31,28 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 using SizeField = std::uint32_t;
 
-constexpr std::string_view versionMessage{
+constexpr std::string_view versionMessage
+{
 	"[version]\n"
 	"[/version]"
 };
 
-constexpr std::string_view mustloginMessage{
+constexpr std::string_view mustloginMessage
+{
 	"[mustlogin]\n"
 	"[/mustlogin]"
 };
 
-constexpr std::string_view joinLobbyMessage{
+constexpr std::string_view joinLobbyMessage
+{
 	"[join_lobby]\n"
 	"is_moderator=\"no\"\n"
 	"profile_url_prefix=\"\"\n"
 	"[/join_lobby]"
 };
 
-constexpr std::string_view gamelistMessage{
+constexpr std::string_view gamelistMessage
+{
 	"[gamelist]\n"
 	"[/gamelist]"
 };
@@ -273,7 +277,7 @@ void ClientHandler::Send(std::string_view message, CompletionHandler&& completio
 			}
 			return;
 		}
-		
+
 		completionHandler();
 	});
 }
