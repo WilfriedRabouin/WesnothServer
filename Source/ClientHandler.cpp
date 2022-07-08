@@ -130,8 +130,8 @@ ClientHandler::ClientHandler(boost::asio::ip::tcp::socket&& socket)
 	++s_instanceCount;
 
 	const Config& config{ Config::GetInstance() };
-	m_readBuffer.reserve(config.bufferCapacity);
-	m_writeBuffer.reserve(config.bufferCapacity);
+	m_readBuffer.reserve(config.clientBufferCapacity);
+	m_writeBuffer.reserve(config.clientBufferCapacity);
 }
 
 // WIP

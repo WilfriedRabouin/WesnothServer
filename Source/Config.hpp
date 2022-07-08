@@ -41,9 +41,9 @@ public:
 	Config& operator=(Config&&) = delete;
 
 	std::size_t clientCountLimit{ 8 };
-	std::size_t bufferCapacity{ 128 };
-	bool isThreadCountAuto{ true };
-	std::size_t threadCount{ 1 };
+	std::size_t clientBufferCapacity{ 128 };
+	bool isClientThreadCountAuto{ true };
+	std::size_t clientThreadCount{ 1 };
 	CompressionLevel compressionLevel{ CompressionLevel::Default };
 
 private:
