@@ -45,7 +45,7 @@ void Accept(boost::asio::ip::tcp::acceptor& acceptor)
 				}
 				else
 				{
-					ClientHandler::create(std::move(socket))->StartHandshake();
+					ClientHandler::Create(std::move(socket))->StartHandshake();
 				}
 			}
 

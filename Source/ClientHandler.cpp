@@ -55,7 +55,7 @@ constexpr std::string_view gamelistMessage{
 
 std::size_t ClientHandler::s_instanceCount{};
 
-[[nodiscard]] std::shared_ptr<ClientHandler> ClientHandler::create(boost::asio::ip::tcp::socket&& socket)
+[[nodiscard]] std::shared_ptr<ClientHandler> ClientHandler::Create(boost::asio::ip::tcp::socket&& socket)
 {
 	return std::shared_ptr<ClientHandler>{ new ClientHandler{ std::move(socket) } };
 }
