@@ -24,6 +24,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <memory>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 
 #include <boost/asio.hpp>
 
@@ -31,7 +32,9 @@ class ClientHandler : public std::enable_shared_from_this<ClientHandler>
 {
 public:
 	[[nodiscard]] static std::shared_ptr<ClientHandler> Create(boost::asio::ip::tcp::socket&& socket);
-	[[nodiscard]] static std::size_t GetInstanceCount();
+
+	[[nodiscard]] static std::size_t GetInstanceCountTotal();
+	[[nodiscard]] static std::size_t GetInstanceCountIpAddress(const std::string& ipAddress);
 
 	ClientHandler(const ClientHandler&) = delete;
 	ClientHandler(ClientHandler&&) = delete;
@@ -53,7 +56,8 @@ private:
 	template <typename CompletionHandler>
 	void Send(std::string_view message, CompletionHandler&& completionHandler);
 
-	static std::size_t s_instanceCount;
+	static std::size_t s_instanceCountTotal;
+	static std::unordered_map<std::string, std::size_t> s_instanceCountIpAddress;
 
 	const std::string m_ipAddress{};
 	boost::asio::ip::tcp::socket m_socket;

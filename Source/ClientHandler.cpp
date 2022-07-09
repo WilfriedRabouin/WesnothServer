@@ -57,22 +57,42 @@ constexpr std::string_view gamelistMessage
 	"[/gamelist]"
 };
 
-std::size_t ClientHandler::s_instanceCount{};
+std::size_t ClientHandler::s_instanceCountTotal{};
+std::unordered_map<std::string, std::size_t> ClientHandler::s_instanceCountIpAddress{};
 
 [[nodiscard]] std::shared_ptr<ClientHandler> ClientHandler::Create(boost::asio::ip::tcp::socket&& socket)
 {
 	return std::shared_ptr<ClientHandler>{ new ClientHandler{ std::move(socket) } };
 }
 
-[[nodiscard]] std::size_t ClientHandler::GetInstanceCount()
+[[nodiscard]] std::size_t ClientHandler::GetInstanceCountTotal()
 {
-	return s_instanceCount;
+	return s_instanceCountTotal;
+}
+
+[[nodiscard]] std::size_t ClientHandler::GetInstanceCountIpAddress(const std::string& ipAddress)
+{
+	if (s_instanceCountIpAddress.contains(ipAddress))
+	{
+		return s_instanceCountIpAddress[ipAddress];
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 ClientHandler::~ClientHandler()
 {
 	spdlog::info("{}: disconnected", m_ipAddress);
-	--s_instanceCount;
+
+	--s_instanceCountTotal;
+	--s_instanceCountIpAddress[m_ipAddress];
+
+	if (s_instanceCountIpAddress[m_ipAddress] == 0)
+	{
+		s_instanceCountIpAddress.erase(m_ipAddress);
+	}
 }
 
 void ClientHandler::StartHandshake()
@@ -131,7 +151,9 @@ ClientHandler::ClientHandler(boost::asio::ip::tcp::socket&& socket)
 	: m_ipAddress{ socket.remote_endpoint().address().to_string() }, m_socket{ std::move(socket) }
 {
 	spdlog::info("{}: connected", m_ipAddress);
-	++s_instanceCount;
+
+	++s_instanceCountTotal;
+	++s_instanceCountIpAddress[m_ipAddress];
 
 	const Config& config{ Config::GetInstance() };
 	m_readBuffer.reserve(config.clientBufferCapacity);

@@ -21,6 +21,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <map>
 #include <stdexcept>
 #include <format>
+#include <string>
 
 #include <boost/asio.hpp>
 #include <spdlog/spdlog.h>
@@ -41,9 +42,15 @@ void Accept(boost::asio::ip::tcp::acceptor& acceptor)
 			}
 			else
 			{
-				if (ClientHandler::GetInstanceCount() == Config::GetInstance().clientCountLimitTotal)
+				const std::string ipAddress{ socket.remote_endpoint().address().to_string() };
+
+				if (ClientHandler::GetInstanceCountTotal() == Config::GetInstance().clientCountLimitTotal)
 				{
-					spdlog::warn("{}: connection refused (client count limit reached)", socket.remote_endpoint().address().to_string());
+					spdlog::warn("{}: connection refused (total limit reached)", ipAddress);
+				}
+				else if (ClientHandler::GetInstanceCountIpAddress(ipAddress) == Config::GetInstance().clientCountLimitIpAddress)
+				{
+					spdlog::warn("{}: connection refused (IP address limit reached)", ipAddress);
 				}
 				else
 				{
