@@ -62,7 +62,15 @@ std::unordered_map<std::string, std::size_t> ClientHandler::s_instanceCountIpAdd
 
 [[nodiscard]] std::shared_ptr<ClientHandler> ClientHandler::Create(boost::asio::ip::tcp::socket&& socket)
 {
-	return std::shared_ptr<ClientHandler>{ new ClientHandler{ std::move(socket) } };
+	class EnableMakeShared : public ClientHandler
+	{
+	public:
+		explicit EnableMakeShared(boost::asio::ip::tcp::socket&& socket) :
+			ClientHandler{ std::move(socket) }
+		{}
+	};
+
+	return std::make_shared<EnableMakeShared>(std::move(socket));
 }
 
 [[nodiscard]] std::size_t ClientHandler::GetInstanceCountTotal()
@@ -153,7 +161,7 @@ ClientHandler::ClientHandler(boost::asio::ip::tcp::socket&& socket) :
 	m_socket{ std::move(socket) }
 {
 	spdlog::info("{} ({:x}) > connected", m_ipAddress, m_id);
-	
+
 	++s_instanceCountTotal;
 	++s_instanceCountIpAddress[m_ipAddress];
 
