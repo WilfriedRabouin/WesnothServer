@@ -15,8 +15,8 @@ add_executable (${PROJECT_NAME}
 	Source/Gzip.hpp
 	Source/Gzip.cpp
 	Source/Versions.hpp
-	Source/Config.hpp
-	Source/Config.cpp
+	Source/ProgramOptions.hpp
+	Source/ProgramOptions.cpp
 )
 
 set_target_properties (${PROJECT_NAME} PROPERTIES
