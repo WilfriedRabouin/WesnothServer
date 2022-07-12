@@ -28,7 +28,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "Server.hpp"
 #include "ClientHandler.hpp"
-#include "Config.hpp"
+#include "ProgramOptions.hpp"
 #include "Gzip.hpp"
 
 static void Accept(boost::asio::ip::tcp::acceptor& acceptor)
@@ -42,13 +42,14 @@ static void Accept(boost::asio::ip::tcp::acceptor& acceptor)
 			}
 			else
 			{
+				const ProgramOptions::Config& config{ ProgramOptions::GetConfig() };
 				const std::string ipAddress{ socket.remote_endpoint().address().to_string() };
 
-				if (ClientHandler::GetInstanceCountTotal() == Config::GetInstance().clientCountLimitTotal)
+				if (ClientHandler::GetInstanceCountTotal() == config.clientCountLimitTotal)
 				{
 					spdlog::warn("{}: connection refused (total limit reached)", ipAddress);
 				}
-				else if (ClientHandler::GetInstanceCountIpAddress(ipAddress) == Config::GetInstance().clientCountLimitIpAddress)
+				else if (ClientHandler::GetInstanceCountIpAddress(ipAddress) == config.clientCountLimitIpAddress)
 				{
 					spdlog::warn("{}: connection refused (IP address limit reached)", ipAddress);
 				}
@@ -66,15 +67,15 @@ namespace Server
 {
 	void Run()
 	{
-		static const std::map<Config::CompressionLevel, Gzip::CompressionLevel> compressionLevelMapping
+		static const std::map<ProgramOptions::Config::CompressionLevel, Gzip::CompressionLevel> compressionLevelMapping
 		{
-			{ Config::CompressionLevel::None, Gzip::CompressionLevel::None },
-			{ Config::CompressionLevel::Speed, Gzip::CompressionLevel::Speed },
-			{ Config::CompressionLevel::Default, Gzip::CompressionLevel::Default },
-			{ Config::CompressionLevel::Size, Gzip::CompressionLevel::Size }
+			{ ProgramOptions::Config::CompressionLevel::None, Gzip::CompressionLevel::None },
+			{ ProgramOptions::Config::CompressionLevel::Speed, Gzip::CompressionLevel::Speed },
+			{ ProgramOptions::Config::CompressionLevel::Default, Gzip::CompressionLevel::Default },
+			{ ProgramOptions::Config::CompressionLevel::Size, Gzip::CompressionLevel::Size }
 		};
 
-		const Config::CompressionLevel compressionLevel{ Config::GetInstance().compressionLevel };
+		const ProgramOptions::Config::CompressionLevel compressionLevel{ ProgramOptions::GetConfig().compressionLevel };
 
 		if (compressionLevelMapping.contains(compressionLevel))
 		{

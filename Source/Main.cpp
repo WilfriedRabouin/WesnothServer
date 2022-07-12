@@ -25,11 +25,11 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "Server.hpp"
 #include "Versions.hpp"
-#include "Config.hpp"
+#include "ProgramOptions.hpp"
 
 int main(int argc, char* argv[])
 {
-	if (!Config::Init(argc, argv))
+	if (!ProgramOptions::Init(argc, argv))
 	{
 		return EXIT_SUCCESS;
 	}

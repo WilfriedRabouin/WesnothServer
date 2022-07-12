@@ -27,7 +27,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "ClientHandler.hpp"
 #include "Gzip.hpp"
-#include "Config.hpp"
+#include "ProgramOptions.hpp"
 
 using SizeField = std::uint32_t;
 
@@ -165,7 +165,7 @@ ClientHandler::ClientHandler(boost::asio::ip::tcp::socket&& socket) :
 	++s_instanceCountTotal;
 	++s_instanceCountIpAddress[m_ipAddress];
 
-	const Config& config{ Config::GetInstance() };
+	const ProgramOptions::Config& config{ ProgramOptions::GetConfig() };
 	m_readBuffer.reserve(config.clientBufferCapacity);
 	m_writeBuffer.reserve(config.clientBufferCapacity);
 }
