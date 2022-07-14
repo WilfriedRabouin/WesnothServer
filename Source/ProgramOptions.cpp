@@ -62,7 +62,11 @@ ProgramOptions::Config ProgramOptions::s_config{};
 
 	if (variablesMap.count("version"))
 	{
-		fmt::print(Versions::g_formatString, Versions::g_server, Versions::g_client);
+		fmt::print(
+			"Wesnoth Server - version {}\n"
+			"Compatible with client version {}",
+			Versions::g_server, Versions::g_client);
+
 		return false;
 	}
 

@@ -25,10 +25,4 @@ namespace Versions
 {
 	constexpr std::string_view g_server{ "1.0.0" };
 	constexpr std::string_view g_client{ "1.16.2" };
-
-	constexpr std::string_view g_formatString
-	{
-		"Wesnoth Server - version {}\n"
-		"Compatible with client version {}"
-	};
 }

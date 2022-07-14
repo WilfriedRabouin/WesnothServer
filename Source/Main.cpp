@@ -21,10 +21,8 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <exception>
 
 #include <spdlog/spdlog.h>
-#include <fmt/core.h>
 
 #include "Server.hpp"
-#include "Versions.hpp"
 #include "ProgramOptions.hpp"
 
 int main(int argc, char* argv[])
@@ -33,9 +31,6 @@ int main(int argc, char* argv[])
 	{
 		return EXIT_SUCCESS;
 	}
-
-	fmt::print(Versions::g_formatString, Versions::g_server, Versions::g_client);
-	fmt::print("\n\n");
 
 #ifdef _DEBUG
 	spdlog::set_level(spdlog::level::debug);
