@@ -22,6 +22,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <filesystem>
 #include <thread>
 #include <unordered_map>
+#include <algorithm>
 
 #include <boost/program_options.hpp>
 #include <fmt/core.h>
@@ -111,7 +112,7 @@ ProgramOptions::Config ProgramOptions::s_config{};
 
 		if (value == "auto")
 		{
-			s_config.clientThreadCount = std::thread::hardware_concurrency();
+			s_config.clientThreadCount = std::max(std::thread::hardware_concurrency(), 2u) - 1;
 		}
 		else
 		{
@@ -121,6 +122,7 @@ ProgramOptions::Config ProgramOptions::s_config{};
 
 	fmt::print("client_thread_count={}\n", s_config.clientThreadCount);
 
+	// resume here
 	if (variablesMap.count("compression_level"))
 	{
 		const std::string value{ variablesMap["compression_level"].as<std::string>() };
