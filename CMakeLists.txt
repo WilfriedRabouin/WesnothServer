@@ -17,6 +17,7 @@ add_executable (${PROJECT_NAME}
 	Source/Versions.hpp
 	Source/ProgramOptions.hpp
 	Source/ProgramOptions.cpp
+	Source/PoolAllocator.hpp
 )
 
 set_target_properties (${PROJECT_NAME} PROPERTIES

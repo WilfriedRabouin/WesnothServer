@@ -28,6 +28,8 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <boost/asio.hpp>
 
+#include "PoolAllocator.hpp"
+
 class ClientHandler : public std::enable_shared_from_this<ClientHandler>
 {
 public:
@@ -59,8 +61,11 @@ private:
 	static std::size_t s_instanceCountTotal;
 	static std::unordered_map<std::string, std::size_t> s_instanceCountIpAddress;
 
+	static PoolAllocator<ClientHandler> s_allocator;
+
 	const std::uintptr_t m_id{};
 	const std::string m_ipAddress{};
+
 	boost::asio::ip::tcp::socket m_socket;
 	std::vector<std::uint8_t> m_readBuffer{};
 	std::vector<std::uint8_t> m_writeBuffer{};

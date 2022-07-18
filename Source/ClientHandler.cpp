@@ -60,6 +60,8 @@ constexpr std::string_view gamelistMessage
 std::size_t ClientHandler::s_instanceCountTotal{};
 std::unordered_map<std::string, std::size_t> ClientHandler::s_instanceCountIpAddress{};
 
+PoolAllocator<ClientHandler> ClientHandler::s_allocator{};
+
 [[nodiscard]] std::shared_ptr<ClientHandler> ClientHandler::Create(boost::asio::ip::tcp::socket&& socket)
 {
 	class EnableMakeShared : public ClientHandler
@@ -70,7 +72,7 @@ std::unordered_map<std::string, std::size_t> ClientHandler::s_instanceCountIpAdd
 		{}
 	};
 
-	return std::make_shared<EnableMakeShared>(std::move(socket));
+	return std::allocate_shared<EnableMakeShared>(s_allocator, std::move(socket));
 }
 
 [[nodiscard]] std::size_t ClientHandler::GetInstanceCountTotal()
