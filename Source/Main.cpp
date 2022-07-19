@@ -39,6 +39,7 @@ int main(int argc, char* argv[])
 
 	try
 	{
+		Server::Setup();
 		Server::Run();
 		return EXIT_SUCCESS;
 	}

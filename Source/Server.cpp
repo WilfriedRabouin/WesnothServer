@@ -65,7 +65,7 @@ static void Accept(boost::asio::ip::tcp::acceptor& acceptor)
 
 namespace Server
 {
-	void Run()
+	void Setup()
 	{
 		static const std::map<ProgramOptions::Config::CompressionLevel, Gzip::CompressionLevel> compressionLevelMapping
 		{
@@ -85,7 +85,10 @@ namespace Server
 		{
 			throw std::runtime_error{ std::format("Config compression level {} not mapped", std::to_underlying(compressionLevel)) };
 		}
+	}
 
+	void Run()
+	{
 		constexpr boost::asio::ip::port_type port{ 15000 };
 		const boost::asio::ip::tcp::endpoint endpoint{ boost::asio::ip::tcp::v4(), port };
 		boost::asio::io_context ioContext{};

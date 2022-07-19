@@ -21,5 +21,6 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace Server
 {
+	void Setup();
 	void Run();
 }
