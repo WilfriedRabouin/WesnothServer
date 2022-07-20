@@ -21,6 +21,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <exception>
 
 #include <spdlog/spdlog.h>
+#include <fmt/core.h>
 
 #include "Server.hpp"
 #include "ProgramOptions.hpp"
@@ -32,6 +33,16 @@ int main(int argc, char* argv[])
 		return EXIT_SUCCESS;
 	}
 
+	try
+	{
+		Server::Setup();
+	}
+	catch (const std::exception& exception)
+	{
+		fmt ::print("{}", exception.what());
+		return EXIT_FAILURE;
+	}
+
 #ifdef _DEBUG
 	spdlog::set_level(spdlog::level::debug);
 #endif
@@ -39,7 +50,6 @@ int main(int argc, char* argv[])
 
 	try
 	{
-		Server::Setup();
 		Server::Run();
 		return EXIT_SUCCESS;
 	}
