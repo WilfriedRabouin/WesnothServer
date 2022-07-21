@@ -51,11 +51,12 @@ int main(int argc, char* argv[])
 	try
 	{
 		Server::Run();
-		return EXIT_SUCCESS;
 	}
 	catch (const std::exception& exception)
 	{
 		spdlog::critical("{}", exception.what());
 		return EXIT_FAILURE;
 	}
+
+	return EXIT_SUCCESS;
 }
