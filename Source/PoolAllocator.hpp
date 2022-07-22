@@ -19,8 +19,21 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <memory>
+//#include <memory>
 
 // TODO
+//using PoolAllocator = std::allocator<T>;
+
 template <typename T>
-using PoolAllocator = std::allocator<T>;
+class PoolAllocator
+{
+public:
+	using value_type = T;
+
+	[[nodiscard]] T* allocate(std::size_t /*n*/) { return nullptr; }
+	void deallocate(T* /*p*/, std::size_t /*n*/) {}
+
+private:
+
+
+};
