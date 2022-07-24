@@ -19,6 +19,9 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <new>
+#include <memory>
+
 template <typename T>
 class PoolAllocator
 {
@@ -33,29 +36,54 @@ public:
 		// TODO
 	}
 
-	[[nodiscard]] T* allocate(std::size_t /*n*/)
+	~PoolAllocator()
 	{
-		// TODO
-		return nullptr;
+		std::allocator<T>{}.deallocate(m_p, m_n);
 	}
 
-	void deallocate(T* /*p*/, std::size_t /*n*/)
+	void init(std::size_t n)
 	{
-		// TODO
+		m_n = n;
+		m_p = std::allocator<T>{}.allocate(n);
+		m_next = m_p;
+
+		for (std::size_t i{ 0 }; i != n; ++i)
+		{
+			// TODO: create freelist
+		}
+	}
+
+	[[nodiscard]] T* allocate(std::size_t n)
+	{
+		if (m_n == 0)
+		{
+			throw std::bad_alloc{};
+		}
+
+		if (n != 1)
+		{
+			throw std::bad_array_new_length{};
+		}
+
+		T* p = m_next;
+
+		// TODO: update m_next
+
+		return p;
+	}
+
+	void deallocate(T* /*p*/, std::size_t n)
+	{
+		if (n != 1)
+		{
+			return;
+		}
+
+		// TODO: update freelist
 	}
 
 private:
-	// TODO
+	std::size_t m_n{};
+	T* m_p{};
+	T* m_next{};
 };
-
-//template <typename T, typename U>
-//[[nodiscard]] bool operator==(const PoolAllocator<T>&, const PoolAllocator<U>&)
-//{
-//	return sizeof(T) == sizeof(U);
-//}
-//
-//template <typename T, typename U>
-//[[nodiscard]] bool operator!=(const PoolAllocator<T>&, const PoolAllocator<U>&)
-//{
-//	return sizeof(T) != sizeof(U);
-//}
