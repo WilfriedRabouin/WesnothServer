@@ -260,7 +260,7 @@ void ClientHandler::Receive(CompletionHandler&& completionHandler)
 				return;
 			}
 
-			static_assert(std::is_same_v<unsigned char, std::uint8_t>);
+			static_assert(std::is_same<unsigned char, std::uint8_t>());
 			const std::string_view data{ reinterpret_cast<char*>(m_readBuffer.data()), m_readBuffer.size() };
 			Gzip::Result result{ Gzip::Uncompress(data) };
 
