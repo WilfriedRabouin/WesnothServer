@@ -236,6 +236,7 @@ void ClientHandler::Receive(CompletionHandler&& completionHandler)
 			return sizeField;
 		}();
 
+		static_assert(std::endian::native == std::endian::little);
 		const std::size_t size{ std::byteswap(sizeField) };
 
 		if (size > m_readBuffer.capacity())
@@ -294,6 +295,7 @@ void ClientHandler::Send(std::string_view message, CompletionHandler&& completio
 
 	m_writeBuffer.resize(size);
 
+	static_assert(std::endian::native == std::endian::little);
 	const SizeField sizeField{ std::byteswap(static_cast<SizeField>(result.data.size())) };
 	std::memcpy(m_writeBuffer.data(), &sizeField, sizeof(SizeField));
 	std::memcpy(m_writeBuffer.data() + sizeof(SizeField), result.data.data(), result.data.size());
