@@ -21,6 +21,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <new>
 #include <memory>
+#include <cstring>
 
 template <typename T>
 class PoolAllocator
@@ -38,52 +39,58 @@ public:
 
 	~PoolAllocator()
 	{
-		std::allocator<T>{}.deallocate(m_p, m_n);
+		std::allocator<T>{}.deallocate(m_objectList, m_objectCount);
 	}
 
-	void init(std::size_t n)
+	void Init(std::size_t count)
 	{
-		m_n = n;
-		m_p = std::allocator<T>{}.allocate(n);
-		m_next = m_p;
-
-		for (std::size_t i{ 0 }; i != n; ++i)
-		{
-			// TODO: create freelist
-		}
-	}
-
-	[[nodiscard]] T* allocate(std::size_t n)
-	{
-		if (m_n == 0)
+		if (n == 0)
 		{
 			throw std::bad_alloc{};
 		}
 
+		m_n = n;
+		m_p = std::allocator<T>{}.allocate(n);
+		m_next = m_p;
+
+		for (std::size_t i{ 0 }; i != n - 1; ++i)
+		{
+			const T* next{ m_p + i + 1 };
+			std::memcpy(m_p + i, &next, sizeof(T*));
+		}
+
+		const T* next{ nullptr };
+		std::memcpy(m_p + n - 1, &next, sizeof(T*));
+	}
+
+	[[nodiscard]] T* allocate(std::size_t n)
+	{
 		if (n != 1)
 		{
 			throw std::bad_array_new_length{};
 		}
 
-		T* p = m_next;
+		if (m_next == nullptr)
+		{
+			throw std::bad_alloc{};
+		}
 
-		// TODO: update m_next
-
+		T* p{ m_next };
+		std::memcpy(&m_next, m_next, sizeof(T*));
 		return p;
 	}
 
-	void deallocate(T* /*p*/, std::size_t n)
+	void deallocate(T* p, std::size_t n)
 	{
-		if (n != 1)
+		if (p != nullptr && n == 1)
 		{
-			return;
+			std::memcpy(p, &m_next, sizeof(T*));
+			m_next = p;
 		}
-
-		// TODO: update freelist
 	}
 
 private:
-	std::size_t m_n{};
-	T* m_p{};
-	T* m_next{};
+	std::size_t m_objectCount{};
+	T* m_objectList{};
+	T* m_freeListHead{};
 };
