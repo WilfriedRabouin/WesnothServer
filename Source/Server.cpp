@@ -34,7 +34,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 static void Accept(boost::asio::ip::tcp::acceptor& acceptor)
 {
 	acceptor.async_accept(
-		[&acceptor](const boost::system::error_code& error, boost::asio::ip::tcp::socket&& socket)
+		[&acceptor](const boost::system::error_code& error, boost::asio::ip::tcp::socket socket)
 		{
 			if (error)
 			{

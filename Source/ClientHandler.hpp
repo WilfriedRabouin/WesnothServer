@@ -33,7 +33,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 class ClientHandler : public std::enable_shared_from_this<ClientHandler>
 {
 public:
-	[[nodiscard]] static std::shared_ptr<ClientHandler> Create(boost::asio::ip::tcp::socket&& socket);
+	[[nodiscard]] static std::shared_ptr<ClientHandler> Create(boost::asio::ip::tcp::socket socket);
 
 	[[nodiscard]] static std::size_t GetInstanceCountTotal();
 	[[nodiscard]] static std::size_t GetInstanceCountIpAddress(const std::string& ipAddress);
@@ -48,7 +48,7 @@ public:
 	void StartHandshake();
 
 private:
-	explicit ClientHandler(boost::asio::ip::tcp::socket&& socket);
+	explicit ClientHandler(boost::asio::ip::tcp::socket socket);
 
 	void StartLogin();
 
