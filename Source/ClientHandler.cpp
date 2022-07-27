@@ -22,7 +22,6 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <utility>
 #include <algorithm>
 #include <cstring>
-#include <type_traits>
 
 #include <spdlog/spdlog.h>
 
@@ -260,7 +259,6 @@ void ClientHandler::Receive(CompletionHandler&& completionHandler)
 				return;
 			}
 
-			static_assert(std::is_same<unsigned char, std::uint8_t>());
 			const std::string_view data{ reinterpret_cast<char*>(m_readBuffer.data()), m_readBuffer.size() };
 			Gzip::Result result{ Gzip::Uncompress(data) };
 
