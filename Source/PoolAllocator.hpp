@@ -27,6 +27,8 @@ template <typename T>
 class PoolAllocator
 {
 public:
+	static_assert(sizeof(T) >= sizeof(T*));
+
 	using value_type = T;
 
 	PoolAllocator() = default;
@@ -39,31 +41,31 @@ public:
 
 	~PoolAllocator()
 	{
-		std::allocator<T>{}.deallocate(m_objectList, m_objectCount);
+		std::allocator<T>{}.deallocate(m_pointer, m_count);
 	}
 
 	void Init(std::size_t count)
 	{
-		if (n == 0)
+		if (count == 0)
 		{
 			throw std::bad_alloc{};
 		}
 
-		m_n = n;
-		m_p = std::allocator<T>{}.allocate(n);
-		m_next = m_p;
+		m_count = count;
+		m_pointer = std::allocator<T>{}.allocate(count);
+		m_freeList = m_pointer;
 
-		for (std::size_t i{ 0 }; i != n - 1; ++i)
+		for (std::size_t i{ 0 }; i != count - 1; ++i)
 		{
-			const T* next{ m_p + i + 1 };
-			std::memcpy(m_p + i, &next, sizeof(T*));
+			const T* next{ m_pointer + i + 1 };
+			std::memcpy(m_pointer + i, &next, sizeof(T*));
 		}
 
 		const T* next{ nullptr };
 		std::memcpy(m_p + n - 1, &next, sizeof(T*));
 	}
 
-	[[nodiscard]] T* allocate(std::size_t n)
+	[[nodiscard]] T* allocate(std::size_t count)
 	{
 		if (n != 1)
 		{
@@ -90,7 +92,7 @@ public:
 	}
 
 private:
-	std::size_t m_objectCount{};
-	T* m_objectList{};
-	T* m_freeListHead{};
+	std::size_t m_count{};
+	T* m_pointer{};
+	T* m_freeList{};
 };
