@@ -62,32 +62,32 @@ public:
 		}
 
 		const T* next{ nullptr };
-		std::memcpy(m_p + n - 1, &next, sizeof(T*));
+		std::memcpy(m_pointer + count - 1, &next, sizeof(T*));
 	}
 
 	[[nodiscard]] T* allocate(std::size_t count)
 	{
-		if (n != 1)
+		if (count != 1)
 		{
 			throw std::bad_array_new_length{};
 		}
 
-		if (m_next == nullptr)
+		if (m_freeList == nullptr)
 		{
 			throw std::bad_alloc{};
 		}
 
-		T* p{ m_next };
-		std::memcpy(&m_next, m_next, sizeof(T*));
-		return p;
+		T* pointer{ m_freeList };
+		std::memcpy(&m_freeList, pointer, sizeof(T*));
+		return pointer;
 	}
 
-	void deallocate(T* p, std::size_t n)
+	void deallocate(T* pointer, std::size_t count)
 	{
-		if (p != nullptr && n == 1)
+		if (pointer != nullptr && count == 1)
 		{
-			std::memcpy(p, &m_next, sizeof(T*));
-			m_next = p;
+			std::memcpy(pointer, &m_freeList, sizeof(T*));
+			m_freeList = pointer;
 		}
 	}
 
