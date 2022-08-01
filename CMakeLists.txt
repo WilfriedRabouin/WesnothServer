@@ -2,9 +2,9 @@
 
 project (WesnothServer)
 
-find_package (Boost 1.79.0 REQUIRED COMPONENTS iostreams program_options)
-find_package (spdlog 1.10.0 REQUIRED)
-find_package (fmt 8.1.1 REQUIRED)
+find_package (Boost REQUIRED COMPONENTS iostreams program_options)
+find_package (spdlog REQUIRED)
+find_package (fmt REQUIRED)
 
 add_executable (${PROJECT_NAME}
 	Source/Main.cpp
