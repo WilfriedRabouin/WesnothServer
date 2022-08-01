@@ -1,12 +1,13 @@
 {
-    "name": "wesnoth-server",
-    "version": "1.0.0",
-    "dependencies": [
-        "boost-asio",
-        "boost-iostreams",
-        "boost-program-options",
-        "spdlog",
-        "fmt"
-    ],
-    "builtin-baseline": "3d8f78171a2a37d461077bf8d063256b63e25a4f"
+	"name": "wesnoth-server",
+	"version": "1.0.0",
+	"dependencies": [
+		"boost-asio",
+		"boost-iostreams",
+		"boost-program-options",
+		"spdlog",
+		"fmt",
+		"zlib"
+	],
+	"builtin-baseline": "3d8f78171a2a37d461077bf8d063256b63e25a4f"
 }
