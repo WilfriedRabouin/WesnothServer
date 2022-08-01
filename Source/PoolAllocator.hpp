@@ -39,12 +39,12 @@ public:
 		// TODO
 	}
 
-	~PoolAllocator()
+	/*~PoolAllocator()
 	{
 		std::allocator<T>{}.deallocate(m_pointer, m_count);
-	}
+	}*/
 
-	void Init(std::size_t count)
+	/*void Init(std::size_t count)
 	{
 		if (count == 0)
 		{
@@ -63,11 +63,12 @@ public:
 
 		const T* next{ nullptr };
 		std::memcpy(m_pointer + count - 1, &next, sizeof(T*));
-	}
+	}*/
 
 	[[nodiscard]] T* allocate(std::size_t count)
 	{
-		if (count != 1)
+		return std::allocator<T>{}.allocate(count);
+		/*if (count != 1)
 		{
 			throw std::bad_array_new_length{};
 		}
@@ -79,20 +80,21 @@ public:
 
 		T* pointer{ m_freeList };
 		std::memcpy(&m_freeList, pointer, sizeof(T*));
-		return pointer;
+		return pointer;*/
 	}
 
 	void deallocate(T* pointer, std::size_t count)
 	{
-		if (pointer != nullptr && count == 1)
+		std::allocator<T>{}.deallocate(pointer, count);
+		/*if (pointer != nullptr && count == 1)
 		{
 			std::memcpy(pointer, &m_freeList, sizeof(T*));
 			m_freeList = pointer;
-		}
+		}*/
 	}
 
 private:
-	std::size_t m_count{};
-	T* m_pointer{};
-	T* m_freeList{};
+	//std::size_t m_count{};
+	//T* m_pointer{};
+	//T* m_freeList{};
 };
