@@ -42,6 +42,7 @@ public:
 		Config& operator=(const Config&) = delete;
 		Config& operator=(Config&&) = delete;
 
+		std::uint16_t serverPort{ 15000 };
 		std::size_t clientCountLimitTotal{ 8 };
 		std::size_t clientCountLimitIpAddress{ 4 };
 		std::size_t clientBufferCapacity{ 128 };
