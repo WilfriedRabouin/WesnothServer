@@ -29,7 +29,9 @@ set_target_properties (${PROJECT_NAME} PROPERTIES
 target_include_directories (${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries (${PROJECT_NAME} PRIVATE Boost::iostreams Boost::program_options spdlog::spdlog fmt::fmt)
 
-# TODO: use COMPILE_WARNING_AS_ERROR instead of /WX flag once CMake 3.24 is available
+# TODO: use COMPILE_WARNING_AS_ERROR instead of /WX and -Werror flags once CMake 3.24 is available for MSVC and Fedora Server
 if (MSVC)
 	target_compile_options (${PROJECT_NAME} PRIVATE /W4 /WX)
+else ()
+	target_compile_options (${PROJECT_NAME} PRIVATE -Wall -Wextra -Werror)
 endif ()
