@@ -89,8 +89,7 @@ namespace Server
 
 	void Run()
 	{
-		constexpr boost::asio::ip::port_type port{ 15000 };
-		const boost::asio::ip::tcp::endpoint endpoint{ boost::asio::ip::tcp::v4(), port };
+		const boost::asio::ip::tcp::endpoint endpoint{ boost::asio::ip::tcp::v4(), ProgramOptions::GetConfig().serverPort };
 		boost::asio::io_context ioContext{};
 		boost::asio::ip::tcp::acceptor acceptor{ ioContext, endpoint };
 		Accept(acceptor);
