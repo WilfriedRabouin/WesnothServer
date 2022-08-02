@@ -268,7 +268,7 @@ void ClientHandler::Receive(CompletionHandler&& completionHandler)
 				return;
 			}
 
-			spdlog::debug("{} ({:x}) > receiving {} bytes\n{}", m_ipAddress, m_id, m_readBuffer.size() + sizeof(SizeField), result.data);
+			spdlog::debug("{} ({:x}) > received {} bytes\n{}", m_ipAddress, m_id, m_readBuffer.size() + sizeof(SizeField), result.data);
 			completionHandler(std::move(result).data);
 		});
 	});
