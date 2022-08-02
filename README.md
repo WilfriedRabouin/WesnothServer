@@ -6,9 +6,9 @@ Wesnoth Server is a server for the game [The Battle for Wesnoth](https://www.wes
 
 ### Prerequisites
 
-- Git
+- [Git](https://git-scm.com/)
 - [CMake](https://cmake.org/) 3.21 or newer
-- Clang 14 or newer
+- [Clang](https://clang.llvm.org/) 14 or newer
 - [Vcpkg](https://vcpkg.io/)
 
 ### Steps
