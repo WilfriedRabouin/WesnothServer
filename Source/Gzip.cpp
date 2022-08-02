@@ -20,7 +20,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 #include <sstream>
 #include <utility>
 #include <ios>
-#include <map>
+#include <unordered_map>
 #include <stdexcept>
 
 #include <boost/iostreams/filtering_streambuf.hpp>
@@ -38,7 +38,7 @@ namespace Gzip
 {
 	void SetCompressionLevel(CompressionLevel level)
 	{
-		static const std::map<CompressionLevel, int> mapping
+		static const std::unordered_map<CompressionLevel, int> mapping
 		{
 			{ CompressionLevel::None, boost::iostreams::gzip::no_compression },
 			{ CompressionLevel::Speed, boost::iostreams::gzip::best_speed },

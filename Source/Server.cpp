@@ -18,7 +18,7 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <utility>
-#include <map>
+#include <unordered_map>
 #include <stdexcept>
 #include <string>
 
@@ -67,7 +67,7 @@ namespace Server
 {
 	void Setup()
 	{
-		static const std::map<ProgramOptions::Config::CompressionLevel, Gzip::CompressionLevel> compressionLevelMapping
+		static const std::unordered_map<ProgramOptions::Config::CompressionLevel, Gzip::CompressionLevel> compressionLevelMapping
 		{
 			{ ProgramOptions::Config::CompressionLevel::None, Gzip::CompressionLevel::None },
 			{ ProgramOptions::Config::CompressionLevel::Speed, Gzip::CompressionLevel::Speed },
