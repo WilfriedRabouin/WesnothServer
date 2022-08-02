@@ -42,6 +42,7 @@ ProgramOptions::Config ProgramOptions::s_config{};
 
 	boost::program_options::options_description configurationOptions{ "Configuration" };
 	configurationOptions.add_options()
+		("server_port", boost::program_options::value<std::uint16_t>())
 		("client_count_limit_total", boost::program_options::value<std::size_t>())
 		("client_count_limit_ip_address", boost::program_options::value<std::size_t>())
 		("client_buffer_capacity", boost::program_options::value<std::size_t>())
@@ -57,7 +58,7 @@ ProgramOptions::Config ProgramOptions::s_config{};
 
 	if (variablesMap.count("help"))
 	{
-		std::cout << commandLineOptions << "\n";
+		std::cout << commandLineOptions;
 		return false;
 	}
 
@@ -67,24 +68,48 @@ ProgramOptions::Config ProgramOptions::s_config{};
 		(
 			"Wesnoth Server - version {}\n"
 			"Compatible with client version {}",
-			Versions::g_server, Versions::g_client
+			Versions::g_server, Versions::g_compatibleClient
 		);
 		return false;
 	}
 
-	const std::string configurationFileName{ variablesMap.count("config") ? variablesMap["config"].as<std::string>() : "config.ini" };
-
-	if (std::filesystem::exists(configurationFileName))
+	if (variablesMap.count("config"))
 	{
-		fmt::print("Load configuration file\n");
-		boost::program_options::store(boost::program_options::parse_config_file(configurationFileName.c_str(), configurationOptions), variablesMap);
-		boost::program_options::notify(variablesMap);
+		/*try
+		{*/
+		const std::string configurationFileName{ variablesMap["config"].as<std::string>() };
+
+		if (std::filesystem::exists(configurationFileName))
+		{
+			fmt::print("Load configuration file\n");
+			boost::program_options::store(boost::program_options::parse_config_file(configurationFileName.c_str(), configurationOptions), variablesMap);
+			boost::program_options::notify(variablesMap);
+		}
+		else
+		{
+			fmt::print("Configuration file not found");
+			return false;
+		}
+		/*}
+		catch (const std::exception& exception)
+		{
+			fmt::print("Configuration file not found ({})", exception.what());
+			return false;
+		}*/
 	}
 	else
 	{
-		fmt::print("Configuration file not found\n");
+		//	constexpr std::string configurationFile{ "config.ini" };
 	}
 
+	if (variablesMap.count("server_port"))
+	{
+		s_config.serverPort = variablesMap["server_port"].as<std::uint16_t>();
+	}
+
+	fmt::print("server_port={}\n", s_config.serverPort);
+
+	// TODO: check if >=1
 	if (variablesMap.count("client_count_limit_total"))
 	{
 		s_config.clientCountLimitTotal = variablesMap["client_count_limit_total"].as<std::size_t>();
