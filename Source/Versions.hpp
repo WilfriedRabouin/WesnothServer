@@ -24,5 +24,5 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 namespace Versions
 {
 	constexpr std::string_view g_server{ "1.0.0" };
-	constexpr std::string_view g_client{ "1.16.2" };
+	constexpr std::string_view g_compatibleClient{ "1.16.2" };
 }
