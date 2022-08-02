@@ -200,7 +200,7 @@ void ClientHandler::StartLogin()
 													spdlog::info("{} ({:x}) > login successful", m_ipAddress, m_id);
 
 													Receive(
-														[this](std::string&& /*message*/)
+														[/*this*/](std::string&& /*message*/)
 														{
 															// nothing
 														});
