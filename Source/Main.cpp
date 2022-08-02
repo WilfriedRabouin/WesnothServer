@@ -30,14 +30,12 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 int main(int argc, char* argv[])
 {
-	if (std::ifstream bannerFile{ "Banner.txt" }; bannerFile)
+	if (std::ifstream bannerFile{ "Banner.txt" }; bannerFile.is_open())
 	{
 		fmt::print("\n");
 
-		while (bannerFile)
+		for (std::string line{}; std::getline(bannerFile, line);)
 		{
-			std::string line{};
-			std::getline(bannerFile, line);
 			fmt::print("{}\n", line);
 		}
 
