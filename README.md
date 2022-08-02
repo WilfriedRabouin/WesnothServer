@@ -1,6 +1,6 @@
 # Wesnoth Server
 
-Wesnoth Server is a server for the game [The Battle for Wesnoth](https://www.wesnoth.org/). It is developed with stability, security and performance in mind.
+Wesnoth Server is a server for the game [The Battle for Wesnoth](https://www.wesnoth.org/) compatible with Windows and Linux. It is developed with stability, security and performance in mind.
 
 ## Building for Linux
 
@@ -8,7 +8,7 @@ Wesnoth Server is a server for the game [The Battle for Wesnoth](https://www.wes
 
 - Git
 - [CMake](https://cmake.org/) 3.21 or newer
-- A C++23 Compiler (GCC 12, Clang 14, MSVC 19.31 or newer)
+- A C++23 Compiler (GCC 12, Clang 14 or newer)
 - [Vcpkg](https://vcpkg.io/)
 
 ### Steps
