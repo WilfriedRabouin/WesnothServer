@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 	spdlog::set_level(spdlog::level::debug);
 #endif
 	spdlog::set_pattern("[%Y-%m-%d %T.%e] [%t] [%^%l%$] %v");
