@@ -40,3 +40,8 @@ if (MSVC)
 else ()
 	target_compile_options (${PROJECT_NAME} PRIVATE -Wall -Wextra -Werror)
 endif ()
+
+add_custom_command (
+	TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/Source/Banner.txt ${CMAKE_CURRENT_BINARY_DIR}/Banner.txt
+)
