@@ -19,6 +19,8 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <cstdlib>
 #include <exception>
+#include <fstream>
+#include <string>
 
 #include <spdlog/spdlog.h>
 #include <fmt/core.h>
@@ -28,6 +30,20 @@ along with WesnothServer.  If not, see <https://www.gnu.org/licenses/>.
 
 int main(int argc, char* argv[])
 {
+	if (std::ifstream bannerFile{ "Banner.txt" }; bannerFile)
+	{
+		fmt::print("\n");
+
+		while (bannerFile)
+		{
+			std::string line{};
+			std::getline(bannerFile, line);
+			fmt::print("{}\n", line);
+		}
+
+		fmt::print("\n");
+	}
+
 	if (!ProgramOptions::Init(argc, argv))
 	{
 		return EXIT_SUCCESS;
@@ -39,7 +55,7 @@ int main(int argc, char* argv[])
 	}
 	catch (const std::exception& exception)
 	{
-		fmt ::print("{}", exception.what());
+		fmt::print("{}", exception.what());
 		return EXIT_FAILURE;
 	}
 
